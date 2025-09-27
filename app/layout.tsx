@@ -1,10 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Monofett } from "next/font/google";
+import { Inter, Rampart_One } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
   variable: "--font-inter-sans",
   subsets: ["latin"],
+});
+
+const rampart = Rampart_One({
+  variable: "--font-rampart-one",
+  subsets: ["latin"],
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -48,7 +54,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-}
+};
 
 export default function RootLayout({
   children,
@@ -57,7 +63,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} antialiased`}>{children}</body>
+      <body className={`${inter.variable} ${rampart.variable} antialiased`}>{children}</body>
     </html>
   );
 }
