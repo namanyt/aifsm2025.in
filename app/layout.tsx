@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { Header } from "@/components/common/header";
 import { Footer } from "@/components/common/footer";
+import { AuthProvider } from "@/lib/auth/authContext";
 
 const inter = Inter({
   variable: "--font-inter-sans",
@@ -68,7 +69,9 @@ export default function RootLayout({
     <html lang="en" className="h-full">
       <body className={`${inter.variable} ${rampart.variable} antialiased`}>
         <Header />
-        <main className="">{children}</main>
+        <AuthProvider>
+          <main className="">{children}</main>
+        </AuthProvider>
         <Footer />
       </body>
     </html>

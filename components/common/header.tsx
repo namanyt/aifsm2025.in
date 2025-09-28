@@ -2,9 +2,18 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { pb } from "@/lib/db/pb";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 
 export function Header() {
   const pathname = usePathname();
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setLoggedIn(pb.authStore.isValid); // only read client-side
+  }, []);
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -72,25 +81,64 @@ export function Header() {
 
           {/* Action Buttons */}
           <div className="flex justify-start items-center gap-5">
-            <Link
-              href="/login"
-              className="px-6 py-2 bg-[#4169E1] rounded-lg flex justify-center items-center gap-2.5 transition-colors hover:bg-[#274fa1]"
-            >
-              <span className="text-center justify-center text-white text-sm font-medium font-['Inter'] leading-tight tracking-tight">
-                Login
-              </span>
-            </Link>
-            <Link
-              href="/register"
-              className="px-6 py-2 rounded-lg border-2 border-[#4169E1] flex justify-center items-center gap-2.5 transition-colors hover:bg-blue-50"
-            >
-              <span className="text-center justify-center text-[#4169E1] text-sm font-medium font-['Inter'] leading-tight tracking-tight">
-                Registration
-              </span>
-            </Link>
+            {loggedIn ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="px-6 py-[.80rem] top-[0.5rem] bg-[#4169E1] rounded-lg flex justify-center items-center gap-2.5 transition-colors hover:bg-[#274fa1]"
+                >
+                  <span className="text-center justify-center text-white text-sm font-medium font-['Inter'] leading-tight tracking-tight">
+                    Dashboard
+                  </span>
+                </Link>
+                <Button
+                  className="px-6 py-2 bg-red-500 rounded-lg flex justify-center items-center gap-2.5 transition-colors hover:bg-red-400"
+                  onClick={() => {
+                    pb.authStore.clear();
+                    window.location.href = "/";
+                  }}
+                >
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="px-6 py-2 bg-[#4169E1] rounded-lg flex justify-center items-center gap-2.5 transition-colors hover:bg-[#274fa1]"
+                >
+                  <span className="text-center justify-center text-white text-sm font-medium font-['Inter'] leading-tight tracking-tight">
+                    Login
+                  </span>
+                </Link>
+                <Link
+                  href="/register"
+                  className="px-6 py-2 rounded-lg border-2 border-[#4169E1] flex justify-center items-center gap-2.5 transition-colors hover:bg-blue-50"
+                >
+                  <span className="text-center justify-center text-[#4169E1] text-sm font-medium font-['Inter'] leading-tight tracking-tight">
+                    Registration
+                  </span>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
     </div>
+  );
+}
+
+export function Header_Image() {
+  return (
+    <>
+      <Image
+        src="/ui/header_image.png"
+        alt="About AIFSM 2025"
+        width={1920}
+        height={200}
+        className="object-cover overflow-hidden h-[300px]"
+        priority
+      />
+    </>
   );
 }

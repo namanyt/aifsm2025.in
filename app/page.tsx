@@ -18,14 +18,14 @@ export default function HomePage() {
   ];
 
   const quickLinks = [
-    "Proceedings",
-    "Officers",
-    "Important Contacts",
-    "Event Incharge Details",
-    "Venues",
-    "Route Map",
-    "AIFSM Booklet",
-    "Sports Meet Result",
+    { name: "Proceedings", content: "#" },
+    { name: "Officers", content: "#" },
+    { name: "Important Contacts", content: "#" },
+    { name: "Event Incharge Details", content: "#" },
+    { name: "Venues", content: "#" },
+    { name: "Route Map", content: "#" },
+    { name: "AIFSM Booklet", content: "#" },
+    { name: "Sports Meet Result", content: "#" },
   ];
 
   const newsItems = [
@@ -122,10 +122,10 @@ export default function HomePage() {
             {quickLinks.map((link, index) => (
               <Link
                 key={index}
-                href={`#${link.toLowerCase().replace(/\s+/g, "-")}`}
+                href={`${link.content}`}
                 className="px-6 py-4 rounded-md border-2 border-orange-500 text-orange-600 hover:bg-orange-50 transition-colors"
               >
-                {link}
+                {link.name}
               </Link>
             ))}
           </div>

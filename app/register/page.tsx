@@ -1,14 +1,30 @@
+import { Header_Image } from "@/components/common/header";
 import type { Metadata } from "next";
+import { RegisterForm } from "@/components/common/registerForm";
 
 export const metadata: Metadata = {
   title: "Registration",
   description: "Registration for AIFSM 2025 - All India Forest Sports Meet 2025",
-}
+};
 
 export default function Registration() {
   return (
-    <>
-    Registration Page
-    </>
+    <div>
+      <Header_Image />
+
+      <div className="absolute left-1/2 transform -translate-x-1/2 top-80 text-center">
+        {/* blur background around the registration text */}
+        <div className="dark:bg-gray-50/30 backdrop-blur-xs rounded-lg py-4 px-10 shadow-lg">
+          <h1 className="text-4xl font-bold mb-4 text-[#c96e00] mt-2">Registration</h1>
+          {/* a small horizontal line thick */}
+          <div className="border-b-4 border-[#c96e00] w-24 mx-auto mb-4"></div>
+        </div>
+      </div>
+
+      {/* align it to the center of this div */}
+      <div className="mt-20 mb-20 px-4 flex justify-center">
+        <RegisterForm />
+      </div>
+    </div>
   );
 }
