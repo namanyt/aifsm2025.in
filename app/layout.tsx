@@ -2,6 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Rampart_One } from "next/font/google";
 import "./globals.css";
 
+import { Header } from "@/components/common/header";
+import { Footer } from "@/components/common/footer";
+
 const inter = Inter({
   variable: "--font-inter-sans",
   subsets: ["latin"],
@@ -62,8 +65,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} ${rampart.variable} antialiased`}>{children}</body>
+    <html lang="en" className="h-full">
+      <body className={`${inter.variable} ${rampart.variable} antialiased`}>
+        <Header />
+        <main className="">{children}</main>
+        <Footer />
+      </body>
     </html>
   );
 }
