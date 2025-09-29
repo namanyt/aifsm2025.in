@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { createPlayer } from "@/lib/db/pb";
-import { sportsData } from "@/lib/types";
+import { sportsData, bloodGroups } from "@/lib/types";
 import type { Player } from "@/lib/types";
 import { toast } from "sonner";
 
@@ -136,14 +136,21 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
               />
             </div>
             <div className="flex flex-col w-full space-y-2">
-              <label className="font-semibold text-gray-700">Enter Blood Group</label>
-              <input
+              <label className="font-semibold text-gray-700">Select Blood Group</label>
+              <select
                 className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
                 value={formData.bloodGroup}
                 name="bloodGroup"
                 onChange={handleChange}
                 required
-              />
+              >
+                <option value="">Select Blood Group</option>
+                {Object.entries(bloodGroups).map(([key, value]) => (
+                  <option key={key} value={value}>
+                    {value}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="flex flex-col w-full space-y-2">
               <label className="font-semibold text-gray-700">Enter Mobile Number</label>
@@ -283,8 +290,8 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
                 {formData.profilePicture && (
                   <span className="text-blue-600 underline text-sm mb-2">
                     {formData.profilePicture &&
-                    typeof formData.profilePicture === "object" &&
-                    "name" in formData.profilePicture
+                      typeof formData.profilePicture === "object" &&
+                      "name" in formData.profilePicture
                       ? formData.profilePicture.name
                       : "View"}{" "}
                     (preview)
@@ -304,8 +311,8 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
                 {formData.employeeIDCard && (
                   <span className="text-blue-600 underline text-sm mb-2">
                     {formData.employeeIDCard &&
-                    typeof formData.employeeIDCard === "object" &&
-                    "name" in formData.employeeIDCard
+                      typeof formData.employeeIDCard === "object" &&
+                      "name" in formData.employeeIDCard
                       ? formData.employeeIDCard.name
                       : "View"}{" "}
                     (preview)

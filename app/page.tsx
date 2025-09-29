@@ -109,7 +109,7 @@ export default function HomePage() {
             <div className="px-8 py-4 bg-black/25 rounded-2xl border border-blue-300">
               <span className="text-white text-xl font-bold">12th-16th November</span>
             </div>
-            <div className="h-16 border-l border-blue-300" />
+            <div className="h-16 border-l border-blue-300 hidden lg:block" />
             <Countdown />
           </div>
         </div>

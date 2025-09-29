@@ -75,7 +75,7 @@ export function RegisterForm() {
 
   return (
     <div className="w-full flex flex-col items-center py-12 bg-white">
-      <h2 className="text-3xl font-bold text-center text-[#9E5700] mb-2">Registration</h2>
+      <h2 className="text-3xl font-bold text-center text-[#9E5700] mb-2">Register</h2>
       <div className="w-16 h-1 bg-[#9E5700] mx-auto mb-8 rounded" />
       <div className="w-full max-w-xl">
         <Form {...form}>
@@ -88,24 +88,21 @@ export function RegisterForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-base font-semibold text-sky-900 mb-1">Select State/Organisation</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="w-full h-12 px-4 bg-white border-2 border-sky-600 shadow-lg rounded-xl text-black font-semibold cursor-pointer focus:ring-2 focus:ring-sky-400 focus:border-sky-600 transition-all">
-                        <SelectValue placeholder="40 states/departments/Institutes" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="max-h-64 max-w-[50vw] backdrop-blur-sm bg-white/50 ">
+                  <FormControl>
+                    <select
+                      {...field}
+                      className="w-full h-12 px-4 bg-white border-2 border-sky-600 shadow-lg rounded-xl text-black font-semibold cursor-pointer focus:ring-2 focus:ring-sky-400 focus:border-sky-600 transition-all appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-10"
+                    >
+                      <option value="" disabled>
+                        40 states/departments/Institutes
+                      </option>
                       {orgOptions.map((org) => (
-                        <SelectItem
-                          key={org}
-                          value={org}
-                          className="cursor-pointer w-full hover:bg-blue-50 bg-white/50 backdrop-blur-sm border-2 border-gray-200"
-                        >
+                        <option key={org} value={org}>
                           {org}
-                        </SelectItem>
+                        </option>
                       ))}
-                    </SelectContent>
-                  </Select>
+                    </select>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -165,7 +162,7 @@ export function RegisterForm() {
               onClick={form.handleSubmit(handleSubmit)}
               className="w-full h-12 bg-gradient-to-r from-sky-700 to-cyan-600 hover:from-cyan-600 hover:to-sky-700 text-white font-bold rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 mt-4 text-lg shadow-md cursor-pointer"
             >
-              Register
+              Login
             </button>
           </div>
         </Form>

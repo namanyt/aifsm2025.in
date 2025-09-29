@@ -15,9 +15,9 @@ export default function Login() {
       <div className="absolute left-1/2 transform -translate-x-1/2 top-80 text-center">
         {/* blur background around the login text */}
         <div className="dark:bg-gray-50/30 backdrop-blur-xs rounded-lg py-4 px-10 shadow-lg">
-          <h1 className="text-4xl font-bold mb-4 text-[#c96e00] mt-2">Login</h1>
+          <h1 className="text-4xl font-bold mb-4 text-white mt-2">Login</h1>
           {/* a small horizontal line thick */}
-          <div className="border-b-4 border-[#c96e00] w-24 mx-auto mb-4"></div>
+          <div className="border-b-4 border-white w-24 mx-auto mb-4"></div>
         </div>
       </div>
 

@@ -29,7 +29,7 @@ export function LoginForm() {
       password: data.password,
       org: data.org,
     };
-    console.log("Registration data:", output);
+    console.log("Login data:", output);
     // Handle form submission here
 
     login(output.email, output.password)

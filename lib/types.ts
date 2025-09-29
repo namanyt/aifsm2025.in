@@ -265,3 +265,18 @@ export const sportsData: SportsDataType = {
     Team: ["Men Open"],
   },
 };
+
+type BloodGroupType = {
+  [key: string]: string;
+}
+
+export const bloodGroups: BloodGroupType = {
+  "A+": "A+",
+  "A-": "A-",
+  "B+": "B+",
+  "B-": "B-",
+  "AB+": "AB+",
+  "AB-": "AB-",
+  "O+": "O+",
+  "O-": "O-",
+};

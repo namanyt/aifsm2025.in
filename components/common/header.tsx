@@ -6,13 +6,15 @@ import { pb } from "@/lib/db/pb";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { Menu, X } from "lucide-react";
 
 export function Header() {
   const pathname = usePathname();
   const [loggedIn, setLoggedIn] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    setLoggedIn(pb.authStore.isValid); // only read client-side
+    setLoggedIn(pb.authStore.isValid);
   }, []);
 
   const navItems = [
@@ -33,66 +35,87 @@ export function Header() {
   };
 
   return (
-    <div className="w-full shadow-[0px_10px_12px_0px_rgba(0,0,0,1)] inline-flex flex-col justify-start items-start top-0 z-50 bg-white">
-      {/* TODO: Make accessibility "skip to main content" and font size adjustable buttons */}
+    <div className="w-full shadow-lg sticky top-0 z-50 bg-white">
+      {/* Top Logo Section */}
+      <div className="w-full px-4 sm:px-6 md:px-12 lg:px-24 py-3 md:py-4 bg-white">
+        <div className="flex justify-between items-center gap-2 sm:gap-4">
+          {/* Left Logos */}
+          <div className="flex justify-start items-center gap-2 sm:gap-3 md:gap-5 flex-shrink-0">
+            <img className="w-8 h-8 sm:w-10 sm:h-10" src="/logos/uk_rajya.png" alt="UK Rajya Logo" />
+            <img className="w-8 h-8 sm:w-10 sm:h-10" src="/logos/uk_forest.png" alt="UK Forest Logo" />
+          </div>
 
-      <div className="w-full px-6 md:px-24 py-4 bg-white inline-flex justify-between items-center">
-        <div className="flex-1 flex justify-between items-center">
-          <div className="flex justify-start items-center gap-5">
-            <img className="w-10 h-10" src="/logos/uk_rajya.png" alt="Logo 1" />
-            <img className="w-10 h-10" src="/logos/uk_forest.png" alt="Logo 2" />
+          {/* Center Text - Hidden on mobile */}
+          <div className="hidden lg:block text-center flex-1 px-4">
+            <div className="text-black text-base xl:text-xl font-medium font-['Inter'] leading-relaxed tracking-tight">
+              28th All India Forest Sports Meet, 2025
+              <br />
+              Uttarakhand Forest Department
+              <br />
+              Government of Uttarakhand
+            </div>
           </div>
-          <div className="text-center justify-start text-black text-xl font-medium font-['Inter'] leading-relaxed tracking-tight hidden md:block">
-            28th All India Forest Sports Meet, 2025
-            <br />
-            Uttarakhand Forest Department
-            <br />
-            Government of Uttarakhand
+
+          {/* Mobile Center Text - Visible only on mobile/tablet */}
+          <div className="lg:hidden text-center flex-1 px-2">
+            <div className="text-black text-xs sm:text-sm md:text-base font-medium font-['Inter'] leading-snug">
+              28th All India Forest Sports Meet, 2025
+            </div>
           </div>
-          <div className="flex justify-start items-center gap-5">
-            <img className="w-20 h-10" src="/logos/life_for_env.png" alt="Logo 3" />
-            <img className="w-10 h-10" src="/logos/nature_logo.png" alt="Logo 4" />
+
+          {/* Right Logos */}
+          <div className="flex justify-end items-center gap-2 sm:gap-3 md:gap-5 flex-shrink-0">
+            <img className="w-12 h-6 sm:w-16 sm:h-8 md:w-20 md:h-10" src="/logos/life_for_env.png" alt="Life for Environment Logo" />
+            <img className="w-8 h-8 sm:w-10 sm:h-10" src="/logos/nature_logo.png" alt="Nature Logo" />
           </div>
         </div>
       </div>
 
-      <nav className="self-stretch h-12 px-6 md:px-24 py-2 bg-white border-t border-zinc-100 flex flex-col justify-center items-center gap-2.5">
-        <div className="w-full flex justify-between items-center">
-          {/* Navigation Items */}
-          <div className="flex-1 flex justify-start items-center gap-4 lg:gap-8 xl:gap-12 2xl:gap-20 px-2 md:px-4">
+      {/* Navigation Section */}
+      <nav className="w-full px-4 sm:px-6 md:px-12 lg:px-24 py-2 bg-white border-t border-zinc-100">
+        <div className="flex justify-between items-center">
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex flex-1 justify-start items-center gap-2 xl:gap-4 2xl:gap-8">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`px-4 py-2 transition-colors rounded text-sm font-${
-                  isActive(item.href) ? "bold" : "medium"
-                } font-['Inter'] leading-tight tracking-tight
-                  ${
-                    isActive(item.href)
-                      ? "bg-green-900 text-white hover:bg-green-800"
-                      : "text-black hover:text-[#4169E1]"
+                className={`px-3 xl:px-4 py-2 transition-colors rounded text-sm font-${isActive(item.href) ? "bold" : "medium"
+                  } font-['Inter'] leading-tight tracking-tight whitespace-nowrap
+                  ${isActive(item.href)
+                    ? "bg-green-900 text-white hover:bg-green-800"
+                    : "text-black hover:text-[#4169E1]"
                   }
                 cursor-pointer`}
               >
-                <span className="text-center justify-center whitespace-nowrap">{item.label}</span>
+                {item.label}
               </Link>
             ))}
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex justify-start items-center gap-5">
+          {/* Mobile Menu Button */}
+          <button
+            className="lg:hidden p-2 hover:bg-gray-100 rounded transition-colors"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+
+          {/* Desktop Action Buttons */}
+          <div className="hidden lg:flex justify-end items-center gap-3 xl:gap-5">
             {loggedIn ? (
               <>
                 <Link
                   href="/dashboard"
-                  className="px-6 py-[.80rem] top-[0.5rem] bg-[#4169E1] rounded-lg flex justify-center items-center gap-2.5 transition-colors hover:bg-[#274fa1] cursor-pointer"
+                  className="px-4 xl:px-6 py-2 bg-[#4169E1] rounded-lg flex justify-center items-center transition-colors hover:bg-[#274fa1] cursor-pointer"
                 >
-                  <span className="text-center justify-center text-white text-sm font-medium font-['Inter'] leading-tight tracking-tight">
+                  <span className="text-white text-sm font-medium font-['Inter'] leading-tight tracking-tight whitespace-nowrap">
                     Dashboard
                   </span>
                 </Link>
                 <Button
-                  className="px-6 py-2 bg-red-500 rounded-lg flex justify-center items-center gap-2.5 transition-colors hover:bg-red-400 cursor-pointer"
+                  className="px-4 xl:px-6 py-2 bg-red-500 rounded-lg hover:bg-red-400"
                   onClick={() => {
                     pb.authStore.clear();
                     window.location.href = "/";
@@ -105,24 +128,87 @@ export function Header() {
               <>
                 <Link
                   href="/login"
-                  className="px-6 py-2 bg-[#4169E1] rounded-lg flex justify-center items-center gap-2.5 transition-colors hover:bg-[#274fa1] cursor-pointer"
+                  className="px-4 xl:px-6 py-2 bg-[#4169E1] rounded-lg flex justify-center items-center transition-colors hover:bg-[#274fa1] cursor-pointer"
                 >
-                  <span className="text-center justify-center text-white text-sm font-medium font-['Inter'] leading-tight tracking-tight">
+                  <span className="text-white text-sm font-medium font-['Inter'] leading-tight tracking-tight whitespace-nowrap">
                     Login
                   </span>
                 </Link>
                 <Link
                   href="/register"
-                  className="px-6 py-2 rounded-lg border-2 border-[#4169E1] flex justify-center items-center gap-2.5 transition-colors hover:bg-blue-50 cursor-pointer"
+                  className="px-4 xl:px-6 py-2 rounded-lg border-2 border-[#4169E1] flex justify-center items-center transition-colors hover:bg-blue-50 cursor-pointer"
                 >
-                  <span className="text-center justify-center text-[#4169E1] text-sm font-medium font-['Inter'] leading-tight tracking-tight">
-                    Registration
+                  <span className="text-[#4169E1] text-sm font-medium font-['Inter'] leading-tight tracking-tight whitespace-nowrap">
+                    Register
                   </span>
                 </Link>
               </>
             )}
           </div>
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden mt-4 pb-4 border-t border-zinc-200 pt-4 space-y-2">
+            {/* Mobile Navigation Links */}
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-4 py-3 transition-colors rounded text-sm font-${isActive(item.href) ? "bold" : "medium"
+                  } font-['Inter']
+                  ${isActive(item.href)
+                    ? "bg-green-900 text-white"
+                    : "text-black hover:bg-gray-100"
+                  }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+
+            {/* Mobile Action Buttons */}
+            <div className="pt-4 space-y-2 border-t border-zinc-200">
+              {loggedIn ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="bg-[#4169E1] text-center text-white hover:bg-[#274fa1]"
+                  >
+                    Dashboard
+                  </Link>
+                  <button
+                    className="bg-red-500 hover:bg-[#f87171] text-white cursor-pointer"
+                    onClick={() => {
+                      pb.authStore.clear();
+                      window.location.href = "/";
+                    }}
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block w-full px-4 py-3 bg-[#4169E1] rounded-lg text-center text-white text-sm font-medium font-['Inter'] hover:bg-[#274fa1]"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block w-full px-4 py-3 rounded-lg border-2 border-[#4169E1] text-center text-[#4169E1] text-sm font-medium font-['Inter'] hover:bg-blue-50"
+                  >
+                    Registration
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </nav>
     </div>
   );
@@ -130,15 +216,15 @@ export function Header() {
 
 export function Header_Image() {
   return (
-    <>
+    <div className="w-full h-[150px] sm:h-[200px] md:h-[250px] lg:h-[300px] relative">
       <Image
         src="/ui/header_image.png"
         alt="About AIFSM 2025"
-        width={1920}
-        height={200}
-        className="object-cover overflow-hidden h-[300px]"
+        fill
+        className="object-cover"
         priority
+        sizes="100vw"
       />
-    </>
+    </div>
   );
 }

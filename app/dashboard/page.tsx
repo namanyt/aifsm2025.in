@@ -10,7 +10,7 @@ import { getServerAuth } from "@/lib/auth/server";
 export default async function Dashboard() {
   // 🔑 Check auth on the server
   const auth = await getServerAuth();
-  
+
   if (!auth.isValid) {
     console.log("User not authenticated, redirecting to /register");
     redirect("/register");
@@ -23,31 +23,54 @@ export default async function Dashboard() {
     sort: "-created",
   });
 
-  // console.log("Fetched players:", players);
-
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      {/* Top header image */}
       <Header_Image />
-      <div className="absolute left-1/2 transform -translate-x-1/2 top-80 text-center">
-        <div className="dark:bg-gray-50/30 backdrop-blur-xs rounded-lg py-4 px-10 shadow-lg">
-          <h1 className="text-4xl font-bold mb-4 text-[#c96e00] mt-2">Dashboard</h1>
-          <div className="border-b-4 border-[#c96e00] w-24 mx-auto mb-4"></div>
+
+      <div className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 top-[75px] sm:top-[100px] md:top-[125px] lg:top-[150px] text-center z-10">
+        <div className="bg-white/20 dark:bg-gray-400/40 backdrop-blur-md border border-white/30 rounded-2xl py-3 px-6 sm:py-4 sm:px-8 md:py-6 md:px-12 shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-3xl hover:bg-white/25">
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold mb-2 sm:mb-3 md:mb-4 text-white drop-shadow-lg">
+            Dashboard
+          </h1>
+          <div className="border-b-4 border-white w-12 sm:w-16 md:w-20 lg:w-24 mx-auto rounded-full"></div>
         </div>
       </div>
 
-      <div className="mt-20"></div>
-      <AddPlayerDialog userId={user?.id ?? ""} />
+      {/* Content container with proper spacing from header */}
+      <div className="pt-4 sm:pt-8 md:pt-12">
+        {/* Add Player button */}
+        <div className="flex justify-center px-4 sm:px-6 mb-8 sm:mb-12">
+          <AddPlayerDialog userId={user?.id ?? ""} />
+        </div>
 
-      <div className="mt-20 mb-20 px-4 flex justify-center">
-        {players.length === 0 ? (
-          <p className="text-gray-500">No players found.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {players.map((player, index) => (
-              <PlayerCard key={player.id} player={player} index={index + 1} />
-            ))}
-          </div>
-        )}
+        {/* PlayerCards Section - Single Column Vertical Layout */}
+        <div className="px-4 sm:px-6 lg:px-8 xl:px-12 mb-20">
+          {players.length === 0 ? (
+            <div className="flex justify-center">
+              <div className="text-center py-12 sm:py-16">
+                <p className="text-gray-500 text-lg sm:text-xl mb-4">No players registered yet</p>
+                <p className="text-gray-400 text-sm sm:text-base">Click "Register New Player" to add your first player</p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <div className="w-full max-w-4xl">
+                {/* Single Column Vertical List */}
+                <div className="space-y-6 sm:space-y-8">
+                  {players.map((player, index) => (
+                    <div key={player.id} className="w-full">
+                      <PlayerCard
+                        player={player}
+                        index={index + 1}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

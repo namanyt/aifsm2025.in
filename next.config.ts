@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
         port: "8090",
         pathname: "/api/files/players/**",
       },
+      {
+        hostname: "*.aifsm2025.in",
+        pathname: "/api/files/**",
+      }
     ],
   },
 };
