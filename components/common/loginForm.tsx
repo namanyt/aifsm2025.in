@@ -7,8 +7,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { RegisterFormData, Orgs } from "@/lib/types";
 import { useAuth } from "@/lib/auth/authContext";
 import { pb } from "@/lib/db/pb";
-import { redirect } from "next/dist/server/api-utils";
-import Link from "next/dist/client/link";
+import Link from "next/link";
 
 export function LoginForm() {
   const form = useForm({
@@ -34,11 +33,14 @@ export function LoginForm() {
     // Handle form submission here
 
     login(output.email, output.password)
-      .then((authData) => {
-        console.log("User logged in: ", authData);
+      .then(() => {
+        console.log("User logged in successfully");
+        console.log("Auth store:", pb.authStore.record);
+        console.log("Cookie export:", pb.authStore.exportToCookie());
         window.location.href = "/dashboard"; // Redirect to dashboard after login
       })
       .catch((error) => {
+        console.error("Login error:", error);
         alert("Invalid credentials. Please check your email and password.");
       });
   };

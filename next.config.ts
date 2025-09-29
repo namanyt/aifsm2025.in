@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "http",
-        hostname: "192.168.29.6",
+        hostname: "94.136.191.187",
         port: "8090",
         pathname: "/api/files/players/**",
       },

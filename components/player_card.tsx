@@ -16,7 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import { updatePlayer, getPlayer } from "@/lib/db/pb";
+import { updatePlayer, getPlayer, db } from "@/lib/db/pb";
 import { deletePlayer } from "@/lib/db/pb";
 import { toast } from "sonner";
 
@@ -326,7 +326,7 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
                       <Image
                         src={
                           typeof formData.profilePicture === "string"
-                            ? `${process.env.DATABASE_URL || "http://192.168.29.6:8090"}/api/files/players/${
+                            ? `${process.env.DATABASE_URL || db}/api/files/players/${
                                 formData.id
                               }/${formData.profilePicture}`
                             : URL.createObjectURL(formData.profilePicture)
@@ -371,7 +371,7 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
                       <Image
                         src={
                           typeof formData.employeeIDCard === "string"
-                            ? `${process.env.DATABASE_URL || "http://192.168.29.6:8090"}/api/files/players/${
+                            ? `${process.env.DATABASE_URL || db}/api/files/players/${
                                 formData.id
                               }/${formData.employeeIDCard}`
                             : URL.createObjectURL(formData.employeeIDCard)

@@ -1,7 +1,8 @@
 import Pocketbase from "pocketbase";
 import type { Player } from "@/lib/types";
 
-export const pb = new Pocketbase(process.env.DATABASE_URL || "http://192.168.29.6:8090");
+export const db = "https://db.aifsm2025.in";
+export const pb = new Pocketbase(process.env.DATABASE_URL || db);
 
 export type DBPlayer = Player & {
   RegisteredBy: string; // User ID who registered the player
