@@ -72,7 +72,7 @@ export function Header() {
                       ? "bg-green-900 text-white hover:bg-green-800"
                       : "text-black hover:text-[#4169E1]"
                   }
-                `}
+                cursor-pointer`}
               >
                 <span className="text-center justify-center whitespace-nowrap">{item.label}</span>
               </Link>
@@ -85,14 +85,14 @@ export function Header() {
               <>
                 <Link
                   href="/dashboard"
-                  className="px-6 py-[.80rem] top-[0.5rem] bg-[#4169E1] rounded-lg flex justify-center items-center gap-2.5 transition-colors hover:bg-[#274fa1]"
+                  className="px-6 py-[.80rem] top-[0.5rem] bg-[#4169E1] rounded-lg flex justify-center items-center gap-2.5 transition-colors hover:bg-[#274fa1] cursor-pointer"
                 >
                   <span className="text-center justify-center text-white text-sm font-medium font-['Inter'] leading-tight tracking-tight">
                     Dashboard
                   </span>
                 </Link>
                 <Button
-                  className="px-6 py-2 bg-red-500 rounded-lg flex justify-center items-center gap-2.5 transition-colors hover:bg-red-400"
+                  className="px-6 py-2 bg-red-500 rounded-lg flex justify-center items-center gap-2.5 transition-colors hover:bg-red-400 cursor-pointer"
                   onClick={() => {
                     pb.authStore.clear();
                     window.location.href = "/";
@@ -105,7 +105,7 @@ export function Header() {
               <>
                 <Link
                   href="/login"
-                  className="px-6 py-2 bg-[#4169E1] rounded-lg flex justify-center items-center gap-2.5 transition-colors hover:bg-[#274fa1]"
+                  className="px-6 py-2 bg-[#4169E1] rounded-lg flex justify-center items-center gap-2.5 transition-colors hover:bg-[#274fa1] cursor-pointer"
                 >
                   <span className="text-center justify-center text-white text-sm font-medium font-['Inter'] leading-tight tracking-tight">
                     Login
@@ -113,7 +113,7 @@ export function Header() {
                 </Link>
                 <Link
                   href="/register"
-                  className="px-6 py-2 rounded-lg border-2 border-[#4169E1] flex justify-center items-center gap-2.5 transition-colors hover:bg-blue-50"
+                  className="px-6 py-2 rounded-lg border-2 border-[#4169E1] flex justify-center items-center gap-2.5 transition-colors hover:bg-blue-50 cursor-pointer"
                 >
                   <span className="text-center justify-center text-[#4169E1] text-sm font-medium font-['Inter'] leading-tight tracking-tight">
                     Registration

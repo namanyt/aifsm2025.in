@@ -5,6 +5,7 @@ import "./globals.css";
 import { Header } from "@/components/common/header";
 import { Footer } from "@/components/common/footer";
 import { AuthProvider } from "@/lib/auth/authContext";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   variable: "--font-inter-sans",
@@ -73,6 +74,7 @@ export default function RootLayout({
           <main className="">{children}</main>
         </AuthProvider>
         <Footer />
+        <Toaster />
       </body>
     </html>
   );

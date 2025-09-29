@@ -8,6 +8,7 @@ import { RegisterFormData, Orgs } from "@/lib/types";
 import { useAuth } from "@/lib/auth/authContext";
 import { pb } from "@/lib/db/pb";
 import { redirect } from "next/dist/server/api-utils";
+import Link from "next/dist/client/link";
 
 export function LoginForm() {
   const form = useForm({
@@ -58,13 +59,17 @@ export function LoginForm() {
                   <FormLabel className="text-base font-semibold text-sky-900 mb-1">Select State/Organisation</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger className="w-full h-12 px-4 bg-gray-300 border-0 rounded-xl text-black">
+                      <SelectTrigger className="w-full h-12 px-4 bg-white border-2 shadow-lg rounded-xl text-black font-semibold cursor-pointer transition-all">
                         <SelectValue placeholder="40 states/departments/Institutes" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className="max-h-48">
+                    <SelectContent className="max-h-64 max-w-[50vw] backdrop-blur-sm bg-white/50 ">
                       {orgOptions.map((org) => (
-                        <SelectItem key={org} value={org} className="cursor-pointer hover:bg-blue-50">
+                        <SelectItem
+                          key={org}
+                          value={org}
+                          className="cursor-pointer w-full hover:bg-blue-50 bg-white/50 backdrop-blur-sm border-2 border-gray-200"
+                        >
                           {org}
                         </SelectItem>
                       ))}
@@ -133,12 +138,20 @@ export function LoginForm() {
             <button
               type="button"
               onClick={form.handleSubmit(handleSubmit)}
-              className="w-full h-12 bg-gradient-to-r from-sky-700 to-cyan-600 hover:from-cyan-600 hover:to-sky-700 text-white font-bold rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 mt-4 text-lg shadow-md"
+              className="w-full h-12 bg-gradient-to-r from-sky-700 to-cyan-600 hover:from-cyan-600 hover:to-sky-700 text-white font-bold rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 mt-4 text-lg shadow-md cursor-pointer"
             >
               Login
             </button>
           </div>
         </Form>
+
+        {/* for forgot password */}
+        {/* AFTER SMTP is setup SET THIS FORM */}
+        <div className="mt-4">
+          <Link href="/login/forgot" className="text-sm text-sky-600 hover:underline cursor-pointer">
+            Forgot Password?
+          </Link>
+        </div>
       </div>
     </div>
   );

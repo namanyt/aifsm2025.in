@@ -3,8 +3,9 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { createPlayer } from "@/lib/db/pb";
-import { sportsData } from "@/components/player_card";
+import { sportsData } from "@/lib/types";
 import type { Player } from "@/lib/types";
+import { toast } from "sonner";
 
 const initialPlayerState: Omit<Player, "id"> = {
   organisation: "",
@@ -76,8 +77,10 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
       setSelectedSubCategory("");
       setSelectedGender("");
       // Optionally: refresh page or show notification
+      toast("Player registered successfully!");
+      window.location.reload();
     } catch (err) {
-      alert("Failed to register player");
+      toast.error("Failed to register player");
     } finally {
       setLoading(false);
     }
@@ -104,7 +107,7 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
             <div className="flex flex-col w-full space-y-2">
               <label className="font-semibold text-gray-700">Organization</label>
               <input
-                className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300"
+                className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
                 value={formData.organisation}
                 name="organisation"
                 onChange={handleChange}
@@ -114,7 +117,7 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
             <div className="flex flex-col w-full space-y-2">
               <label className="font-semibold text-gray-700">Enter Name</label>
               <input
-                className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300"
+                className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
                 value={formData.name}
                 name="name"
                 onChange={handleChange}
@@ -124,7 +127,7 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
             <div className="flex flex-col w-full space-y-2">
               <label className="font-semibold text-gray-700">Enter Age</label>
               <input
-                className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300"
+                className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
                 type="number"
                 value={formData.age}
                 name="age"
@@ -135,7 +138,7 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
             <div className="flex flex-col w-full space-y-2">
               <label className="font-semibold text-gray-700">Enter Blood Group</label>
               <input
-                className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300"
+                className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
                 value={formData.bloodGroup}
                 name="bloodGroup"
                 onChange={handleChange}
@@ -145,7 +148,7 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
             <div className="flex flex-col w-full space-y-2">
               <label className="font-semibold text-gray-700">Enter Mobile Number</label>
               <input
-                className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300"
+                className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
                 value={formData.mobile}
                 name="mobile"
                 onChange={handleChange}
@@ -155,7 +158,7 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
             <div className="flex flex-col w-full space-y-2">
               <label className="font-semibold text-gray-700">Enter Aadhar Card</label>
               <input
-                className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300"
+                className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
                 value={formData.aadhar}
                 name="aadhar"
                 onChange={handleChange}
@@ -165,7 +168,7 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
             <div className="flex flex-col w-full space-y-2">
               <label className="font-semibold text-gray-700">Enter Employee ID</label>
               <input
-                className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300"
+                className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
                 value={formData.employeeId}
                 name="employeeId"
                 onChange={handleChange}
@@ -210,9 +213,9 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
                     ))}
                   </select>
                 </div>
-                {/* Gender Category Dropdown */}
+                {/* Sub Category Dropdown */}
                 <div className="flex flex-col space-y-1">
-                  <label className="text-sm font-medium text-gray-600">Gender Category</label>
+                  <label className="text-sm font-medium text-gray-600">Sub Category</label>
                   <select
                     className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300"
                     value={selectedGender}
@@ -221,7 +224,7 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
                     onBlur={handleEventSelection}
                     required
                   >
-                    <option value="">Select Gender Category</option>
+                    <option value="">Select Sub Category</option>
                     {getGenders().map((gender) => (
                       <option key={gender} value={gender}>
                         {gender}
@@ -273,7 +276,7 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
                 <input
                   type="file"
                   accept="image/png,image/jpeg"
-                  className="mb-4 text-sm"
+                  className="mb-4 text-sm cursor-pointer"
                   name="profilePicture"
                   onChange={handleFileChange}
                 />
@@ -294,7 +297,7 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
                 <input
                   type="file"
                   accept="image/png,image/jpeg"
-                  className="mb-4 text-sm"
+                  className="mb-4 text-sm cursor-pointer"
                   name="employeeIDCard"
                   onChange={handleFileChange}
                 />
@@ -315,7 +318,7 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
             <div className="col-span-1 md:col-span-2 flex justify-center mt-8 pt-6 border-t border-gray-200">
               <Button
                 type="submit"
-                className="bg-sky-600 hover:bg-sky-700 text-white px-12 py-3 rounded-lg text-lg font-semibold transition-colors shadow-lg"
+                className="bg-sky-600 hover:bg-sky-700 text-white px-12 py-3 rounded-lg text-lg font-semibold transition-colors shadow-lg cursor-pointer"
                 disabled={loading}
               >
                 {loading ? "Registering..." : "Register Player"}

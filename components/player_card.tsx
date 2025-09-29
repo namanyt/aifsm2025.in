@@ -5,69 +5,8 @@ import { Button } from "./ui/button";
 import { useState } from "react";
 import Image from "next/image";
 
-// Demo sports data structure
-export type SportsDataType = {
-  [sport: string]: {
-    [subCategory: string]: string[];
-  };
-};
+import { sportsData } from "@/lib/types";
 
-export const sportsData: SportsDataType = {
-  Athletics: {
-    "100m": ["Men", "Women", "Open"],
-    "200m": ["Men", "Women", "Open"],
-    "400m": ["Men", "Women", "Open"],
-    "800m": ["Men", "Women", "Open"],
-    "1500m": ["Men", "Women", "Open"],
-    "1500m Walk": ["Men", "Women", "Open"],
-    "5000m": ["Men", "Women", "Open"],
-    "10000m": ["Men", "Women", "Open"],
-    Marathon: ["Men", "Women", "Open"],
-    "High Jump": ["Men", "Women", "Open"],
-    "Long Jump": ["Men", "Women", "Open"],
-    "Shot Put": ["Men", "Women", "Open"],
-    "Discus Throw": ["Men", "Women", "Open"],
-    "Javelin Throw": ["Men", "Women", "Open"],
-  },
-  Swimming: {
-    "50m Freestyle": ["Men", "Women", "Open"],
-    "100m Freestyle": ["Men", "Women", "Open"],
-    "200m Freestyle": ["Men", "Women", "Open"],
-    "50m Backstroke": ["Men", "Women", "Open"],
-    "100m Backstroke": ["Men", "Women", "Open"],
-    "50m Breaststroke": ["Men", "Women", "Open"],
-    "100m Breaststroke": ["Men", "Women", "Open"],
-    "50m Butterfly": ["Men", "Women", "Open"],
-    "100m Butterfly": ["Men", "Women", "Open"],
-    "200m Individual Medley": ["Men", "Women", "Open"],
-  },
-  Basketball: {
-    "5v5": ["Men", "Women", "Mixed"],
-    "3v3": ["Men", "Women", "Mixed"],
-  },
-  Volleyball: {
-    Indoor: ["Men", "Women", "Mixed"],
-    Beach: ["Men", "Women", "Mixed"],
-  },
-  Badminton: {
-    Singles: ["Men", "Women"],
-    Doubles: ["Men", "Women", "Mixed"],
-    "Mixed Doubles": ["Open"],
-  },
-  Tennis: {
-    Singles: ["Men", "Women"],
-    Doubles: ["Men", "Women", "Mixed"],
-  },
-  Football: {
-    "11v11": ["Men", "Women"],
-    "7v7": ["Men", "Women", "Mixed"],
-  },
-  Cricket: {
-    T20: ["Men", "Women"],
-    "One Day": ["Men", "Women"],
-    "Test Match": ["Men", "Women"],
-  },
-};
 import {
   Dialog,
   DialogContent,
@@ -78,6 +17,8 @@ import {
 } from "@/components/ui/dialog";
 
 import { updatePlayer, getPlayer } from "@/lib/db/pb";
+import { deletePlayer } from "@/lib/db/pb";
+import { toast } from "sonner";
 
 export function PlayerCard({ player, index }: { player: Player; index: number }) {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -179,7 +120,7 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
       </div>
       <div className="flex justify-between mt-4 gap-2">
         <Button
-          className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg"
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg cursor-pointer"
           onClick={() => {
             alert(`Upload Travel Plan for ${player.name}`);
           }}
@@ -187,13 +128,13 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
           Upload Travel Plan
         </Button>
         <Button
-          className="cursor-pointer bg-gray-200 text-gray-800 px-4 py-2 rounded-lg border border-gray-300"
+          className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg border border-gray-300 cursor-pointer"
           onClick={() => openDialog("view")}
         >
           View
         </Button>
         <Button
-          className="cursor-pointer bg-gray-300 text-gray-800 px-4 py-2 rounded-lg"
+          className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg cursor-pointer"
           onClick={() => openDialog("edit")}
         >
           Edit
@@ -211,7 +152,7 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
               <div className="flex flex-col w-full space-y-2">
                 <label className="font-semibold text-gray-700">Organization</label>
                 <input
-                  className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300"
+                  className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
                   value={formData.organisation}
                   name="organisation"
                   readOnly={viewMode}
@@ -221,7 +162,7 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
               <div className="flex flex-col w-full space-y-2">
                 <label className="font-semibold text-gray-700">Enter Name</label>
                 <input
-                  className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300"
+                  className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
                   value={formData.name}
                   name="name"
                   onChange={handleChange}
@@ -231,7 +172,7 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
               <div className="flex flex-col w-full space-y-2">
                 <label className="font-semibold text-gray-700">Enter Age</label>
                 <input
-                  className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300"
+                  className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
                   type="number"
                   value={formData.age}
                   name="age"
@@ -242,7 +183,7 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
               <div className="flex flex-col w-full space-y-2">
                 <label className="font-semibold text-gray-700">Enter Blood Group</label>
                 <input
-                  className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300"
+                  className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
                   value={formData.bloodGroup}
                   name="bloodGroup"
                   onChange={handleChange}
@@ -252,7 +193,7 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
               <div className="flex flex-col w-full space-y-2">
                 <label className="font-semibold text-gray-700">Enter Mobile Number</label>
                 <input
-                  className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300"
+                  className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
                   value={formData.mobile}
                   name="mobile"
                   onChange={handleChange}
@@ -262,7 +203,7 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
               <div className="flex flex-col w-full space-y-2">
                 <label className="font-semibold text-gray-700">Enter Aadhar Card</label>
                 <input
-                  className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300"
+                  className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
                   value={formData.aadhar}
                   name="aadhar"
                   onChange={handleChange}
@@ -272,7 +213,7 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
               <div className="flex flex-col w-full space-y-2">
                 <label className="font-semibold text-gray-700">Enter Employee ID</label>
                 <input
-                  className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300"
+                  className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
                   value={formData.employeeId}
                   name="employeeId"
                   onChange={handleChange}
@@ -299,7 +240,6 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
                       ))}
                     </select>
                   </div>
-
                   {/* Sub Category Dropdown */}
                   <div className="flex flex-col space-y-1">
                     <label className="text-sm font-medium text-gray-600">Event Type</label>
@@ -318,9 +258,9 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
                     </select>
                   </div>
 
-                  {/* Gender Category Dropdown */}
+                  {/* Sub Category Dropdown */}
                   <div className="flex flex-col space-y-1">
-                    <label className="text-sm font-medium text-gray-600">Gender Category</label>
+                    <label className="text-sm font-medium text-gray-600">Sub Category</label>
                     <select
                       className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300"
                       value={selectedGender}
@@ -328,7 +268,7 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
                       disabled={!selectedSubCategory || viewMode}
                       onBlur={handleEventSelection}
                     >
-                      <option value="">Select Gender Category</option>
+                      <option value="">Select Sub Category</option>
                       {getGenders().map((gender) => (
                         <option key={gender} value={gender}>
                           {gender}
@@ -404,7 +344,7 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
                       <input
                         type="file"
                         accept="image/png,image/jpeg"
-                        className="mb-4 text-sm"
+                        className="mb-4 text-sm cursor-pointer"
                         name="profilePicture"
                         onChange={handleFileChange}
                         disabled={viewMode}
@@ -449,7 +389,7 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
                       <input
                         type="file"
                         accept="image/png,image/jpeg"
-                        className="mb-4 text-sm"
+                        className="mb-4 text-sm cursor-pointer"
                         name="employeeIDCard"
                         onChange={handleFileChange}
                         disabled={viewMode}
@@ -470,12 +410,30 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
                 </div>
               </div>
 
-              {/* Save Button */}
+              {/* Save & Remove Buttons */}
               {!viewMode && (
-                <div className="col-span-1 md:col-span-2 flex justify-center mt-8 pt-6 border-t border-gray-200">
+                <div className="col-span-1 md:col-span-2 flex justify-between mt-8 pt-6 border-t border-gray-200">
+                  <Button
+                    type="button"
+                    className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-lg text-lg font-semibold transition-colors shadow-lg cursor-pointer"
+                    onClick={async () => {
+                      if (confirm("Are you sure you want to remove this player?")) {
+                        try {
+                          await deletePlayer(player.id);
+                          setDialogOpen(false);
+                          window.location.reload();
+                          toast("Player removed successfully");
+                        } catch (err) {
+                          alert("Failed to remove player");
+                        }
+                      }
+                    }}
+                  >
+                    Remove
+                  </Button>
                   <Button
                     type="submit"
-                    className="cursor-pointer bg-sky-600 hover:bg-sky-700 text-white px-12 py-3 rounded-lg text-lg font-semibold transition-colors shadow-lg"
+                    className="bg-sky-600 hover:bg-sky-700 text-white px-8 py-3 rounded-lg text-lg font-semibold transition-colors shadow-lg cursor-pointer"
                   >
                     Save and Close
                   </Button>

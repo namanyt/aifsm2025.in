@@ -20,3 +20,7 @@ export async function createPlayer(data: Partial<DBPlayer>) {
 export async function getPlayer(id: string) {
   return pb.collection("players").getOne(id);
 }
+
+export async function deletePlayer(id: string) {
+  return pb.collection("players").delete(id);
+}

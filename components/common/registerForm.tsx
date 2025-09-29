@@ -6,6 +6,8 @@ import { Input } from "../ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { RegisterFormData, Orgs } from "@/lib/types";
 import { useAuth } from "@/lib/auth/authContext";
+import { useState } from "react";
+import { ResetPasswordDialog } from "./ResetPasswordDialog";
 import { pb } from "@/lib/db/pb";
 import { redirect } from "next/dist/server/api-utils";
 
@@ -22,6 +24,10 @@ export function RegisterForm() {
   const orgOptions = Object.keys(Orgs).filter((k) => isNaN(Number(k)));
 
   const { login } = useAuth();
+  const [showReset, setShowReset] = useState(false);
+  const [pendingCreds, setPendingCreds] = useState<{ email: string; password: string } | null>(null);
+  // TODO: Replace this with your actual default password value
+  const DEFAULT_PASSWORD = "changeme";
 
   const handleSubmit = (data: { email: string; password: string; org: string }) => {
     const output = {
@@ -30,16 +36,41 @@ export function RegisterForm() {
       org: data.org,
     };
     console.log("Registration data:", output);
-    // Handle form submission here
 
+    // Always check password correctness first
     login(output.email, output.password)
       .then((authData) => {
-        console.log("User logged in: ", authData);
-        window.location.href = "/dashboard"; // Redirect to dashboard after login
+        if (output.password === DEFAULT_PASSWORD) {
+          setPendingCreds({ email: output.email, password: output.password });
+          setShowReset(true);
+        } else {
+          window.location.href = "/dashboard";
+        }
       })
       .catch((error) => {
         alert("Invalid credentials. Please check your email and password.");
       });
+  };
+
+  // Called when user sets a new password in the dialog
+  const handleResetPassword = async (newPassword: string) => {
+    if (!pendingCreds) return;
+    try {
+      // Log in with default password
+      await login(pendingCreds.email, pendingCreds.password);
+      // Update password in PocketBase
+      await pb.collection("users").update(pb.authStore.record!.id, {
+        password: newPassword,
+        passwordConfirm: newPassword,
+        oldPassword: pendingCreds.password,
+        name: pendingCreds.email.split("@")[0], // Set name as part before @ in email
+        org: form.getValues("org"),
+      });
+      setShowReset(false);
+      window.location.href = "/dashboard";
+    } catch (err) {
+      alert("Failed to reset password. Please try again.");
+    }
   };
 
   return (
@@ -49,6 +80,7 @@ export function RegisterForm() {
       <div className="w-full max-w-xl">
         <Form {...form}>
           <div className="space-y-6">
+            {/* ...existing fields... */}
             <FormField
               control={form.control}
               name="org"
@@ -58,13 +90,17 @@ export function RegisterForm() {
                   <FormLabel className="text-base font-semibold text-sky-900 mb-1">Select State/Organisation</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger className="w-full h-12 px-4 bg-gray-300 border-0 rounded-xl text-black">
+                      <SelectTrigger className="w-full h-12 px-4 bg-white border-2 border-sky-600 shadow-lg rounded-xl text-black font-semibold cursor-pointer focus:ring-2 focus:ring-sky-400 focus:border-sky-600 transition-all">
                         <SelectValue placeholder="40 states/departments/Institutes" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className="max-h-48">
+                    <SelectContent className="max-h-64 max-w-[50vw] backdrop-blur-sm bg-white/50 ">
                       {orgOptions.map((org) => (
-                        <SelectItem key={org} value={org} className="cursor-pointer hover:bg-blue-50">
+                        <SelectItem
+                          key={org}
+                          value={org}
+                          className="cursor-pointer w-full hover:bg-blue-50 bg-white/50 backdrop-blur-sm border-2 border-gray-200"
+                        >
                           {org}
                         </SelectItem>
                       ))}
@@ -74,8 +110,6 @@ export function RegisterForm() {
                 </FormItem>
               )}
             />
-
-            {/* Nodal Officer Login */}
             <FormField
               control={form.control}
               name="email"
@@ -94,15 +128,13 @@ export function RegisterForm() {
                       type="email"
                       placeholder="Enter Email"
                       {...field}
-                      className="h-12 px-4 bg-gray-300 text-black rounded-sm border-0 placeholder:text-gray-500 focus:bg-gray-200"
+                      className="h-12 px-4 bg-gray-300 text-black rounded-sm border-0 placeholder:text-gray-500 focus:bg-gray-200 cursor-pointer"
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            {/* Nodal Officer Password */}
             <FormField
               control={form.control}
               name="password"
@@ -121,25 +153,25 @@ export function RegisterForm() {
                       type="password"
                       placeholder="Enter Password"
                       {...field}
-                      className="h-12 px-4 bg-gray-300 text-black rounded-sm border-0 placeholder:text-gray-500 focus:bg-gray-200"
+                      className="h-12 px-4 bg-gray-300 text-black rounded-sm border-0 placeholder:text-gray-500 focus:bg-gray-200 cursor-pointer"
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            {/* Register Button */}
             <button
               type="button"
               onClick={form.handleSubmit(handleSubmit)}
-              className="w-full h-12 bg-gradient-to-r from-sky-700 to-cyan-600 hover:from-cyan-600 hover:to-sky-700 text-white font-bold rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 mt-4 text-lg shadow-md"
+              className="w-full h-12 bg-gradient-to-r from-sky-700 to-cyan-600 hover:from-cyan-600 hover:to-sky-700 text-white font-bold rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 mt-4 text-lg shadow-md cursor-pointer"
             >
               Register
             </button>
           </div>
         </Form>
       </div>
+      {/* Password Reset Dialog */}
+      <ResetPasswordDialog open={showReset} onClose={() => setShowReset(false)} onSubmit={handleResetPassword} />
     </div>
   );
 }
