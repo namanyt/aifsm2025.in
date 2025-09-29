@@ -8,8 +8,17 @@ import { RegisterFormData, Orgs } from "@/lib/types";
 import { useAuth } from "@/lib/auth/authContext";
 import { pb } from "@/lib/db/pb";
 import Link from "next/link";
+import { ChevronDown } from "lucide-react";
+import { useState } from "react";
+import { ResetPasswordDialog } from "./ResetPasswordDialog";
 
 export function LoginForm() {
+  let [isSelectOpen, setIsSelectOpen] = useState(false);
+  const [showReset, setShowReset] = useState(false);
+  const [pendingCreds, setPendingCreds] = useState<{ email: string; password: string } | null>(null);
+  // TODO: Replace this with your actual default password value
+  const DEFAULT_PASSWORD = "changeme";
+
   const form = useForm({
     defaultValues: {
       email: "",
@@ -23,6 +32,27 @@ export function LoginForm() {
 
   const { login } = useAuth();
 
+  // Called when user sets a new password in the dialog
+  const handleResetPassword = async (newPassword: string) => {
+    if (!pendingCreds) return;
+    try {
+      // Log in with default password
+      await login(pendingCreds.email, pendingCreds.password);
+      // Update password in PocketBase
+      await pb.collection("users").update(pb.authStore.record!.id, {
+        password: newPassword,
+        passwordConfirm: newPassword,
+        oldPassword: pendingCreds.password,
+        name: pendingCreds.email.split("@")[0], // Set name as part before @ in email
+        org: form.getValues("org"),
+      });
+      setShowReset(false);
+      window.location.href = "/dashboard";
+    } catch (err) {
+      alert("Failed to reset password. Please try again.");
+    }
+  };
+
   const handleSubmit = (data: { email: string; password: string; org: string }) => {
     const output = {
       email: data.email,
@@ -32,12 +62,15 @@ export function LoginForm() {
     console.log("Login data:", output);
     // Handle form submission here
 
+    // Always check password correctness first
     login(output.email, output.password)
-      .then(() => {
-        console.log("User logged in successfully");
-        console.log("Auth store:", pb.authStore.record);
-        console.log("Cookie export:", pb.authStore.exportToCookie());
-        window.location.href = "/dashboard"; // Redirect to dashboard after login
+      .then((authData) => {
+        if (output.password === DEFAULT_PASSWORD) {
+          setPendingCreds({ email: output.email, password: output.password });
+          setShowReset(true);
+        } else {
+          window.location.href = "/dashboard";
+        }
       })
       .catch((error) => {
         console.error("Login error:", error);
@@ -59,30 +92,34 @@ export function LoginForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-base font-semibold text-sky-900 mb-1">Select State/Organisation</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="w-full h-12 px-4 bg-white border-2 shadow-lg rounded-xl text-black font-semibold cursor-pointer transition-all">
-                        <SelectValue placeholder="40 states/departments/Institutes" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="max-h-64 max-w-[50vw] backdrop-blur-sm bg-white/50 ">
-                      {orgOptions.map((org) => (
-                        <SelectItem
-                          key={org}
-                          value={org}
-                          className="cursor-pointer w-full hover:bg-blue-50 bg-white/50 backdrop-blur-sm border-2 border-gray-200"
-                        >
-                          {org}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <div className="relative">
+                      <select
+                        {...field}
+                        className="w-full h-12 px-4 bg-white border-2 border-sky-600 shadow-lg rounded-xl text-black font-semibold cursor-pointer focus:ring-2 focus:ring-sky-400 focus:border-sky-600 transition-all appearance-none pr-10"
+                        onFocus={() => setIsSelectOpen(true)}
+                        onBlur={() => setIsSelectOpen(false)}
+                        onMouseDown={() => setIsSelectOpen(!isSelectOpen)}
+                      >
+                        <option value="" disabled>
+                          Select State/Organisation
+                        </option>
+                        {orgOptions.map((org) => (
+                          <option key={org} value={org}>
+                            {org}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown
+                        className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-sky-600 pointer-events-none transition-transform duration-200 ${isSelectOpen ? "rotate-180" : ""
+                          }`}
+                      />
+                    </div>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            {/* Nodal Officer Login */}
             <FormField
               control={form.control}
               name="email"
@@ -101,15 +138,13 @@ export function LoginForm() {
                       type="email"
                       placeholder="Enter Email"
                       {...field}
-                      className="h-12 px-4 bg-gray-300 text-black rounded-sm border-0 placeholder:text-gray-500 focus:bg-gray-200"
+                      className="h-12 px-4 border-2 border-sky-600 text-black rounded-xl placeholder:text-gray-500 focus:bg-gray-200 cursor-pointer"
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            {/* Nodal Officer Password */}
             <FormField
               control={form.control}
               name="password"
@@ -128,7 +163,7 @@ export function LoginForm() {
                       type="password"
                       placeholder="Enter Password"
                       {...field}
-                      className="h-12 px-4 bg-gray-300 text-black rounded-sm border-0 placeholder:text-gray-500 focus:bg-gray-200"
+                      className="h-12 px-4 text-black rounded-xl border-2 border-sky-600 placeholder:text-gray-500 focus:bg-gray-200 cursor-pointer"
                     />
                   </FormControl>
                   <FormMessage />
@@ -148,13 +183,15 @@ export function LoginForm() {
         </Form>
 
         {/* for forgot password */}
-        {/* AFTER SMTP is setup SET THIS FORM */}
+        {/*TODO: AFTER SMTP is setup SET THIS FORM */}
         <div className="mt-4">
           <Link href="/login/forgot" className="text-sm text-sky-600 hover:underline cursor-pointer">
             Forgot Password?
           </Link>
         </div>
       </div>
+      {/* Password Reset Dialog */}
+      <ResetPasswordDialog open={showReset} onClose={() => setShowReset(false)} onSubmit={handleResetPassword} />
     </div>
   );
 }

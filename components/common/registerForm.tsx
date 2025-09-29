@@ -1,7 +1,6 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "../ui/select";
 import { Input } from "../ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { RegisterFormData, Orgs } from "@/lib/types";
@@ -10,6 +9,7 @@ import { useState } from "react";
 import { ResetPasswordDialog } from "./ResetPasswordDialog";
 import { pb } from "@/lib/db/pb";
 import { redirect } from "next/dist/server/api-utils";
+import { ChevronDown } from "lucide-react";
 
 export function RegisterForm() {
   const form = useForm({
@@ -26,6 +26,7 @@ export function RegisterForm() {
   const { login } = useAuth();
   const [showReset, setShowReset] = useState(false);
   const [pendingCreds, setPendingCreds] = useState<{ email: string; password: string } | null>(null);
+  const [isSelectOpen, setIsSelectOpen] = useState(false);
   // TODO: Replace this with your actual default password value
   const DEFAULT_PASSWORD = "changeme";
 
@@ -75,8 +76,6 @@ export function RegisterForm() {
 
   return (
     <div className="w-full flex flex-col items-center py-12 bg-white">
-      <h2 className="text-3xl font-bold text-center text-[#9E5700] mb-2">Register</h2>
-      <div className="w-16 h-1 bg-[#9E5700] mx-auto mb-8 rounded" />
       <div className="w-full max-w-xl">
         <Form {...form}>
           <div className="space-y-6">
@@ -89,19 +88,25 @@ export function RegisterForm() {
                 <FormItem>
                   <FormLabel className="text-base font-semibold text-sky-900 mb-1">Select State/Organisation</FormLabel>
                   <FormControl>
-                    <select
-                      {...field}
-                      className="w-full h-12 px-4 bg-white border-2 border-sky-600 shadow-lg rounded-xl text-black font-semibold cursor-pointer focus:ring-2 focus:ring-sky-400 focus:border-sky-600 transition-all appearance-none bg-no-repeat bg-right bg-[length:16px_16px] pr-10"
-                    >
-                      <option value="" disabled>
-                        40 states/departments/Institutes
-                      </option>
-                      {orgOptions.map((org) => (
-                        <option key={org} value={org}>
-                          {org}
+                    <div className="relative">
+                      <select
+                        {...field}
+                        className="w-full h-12 px-4 bg-white border-2 border-sky-600 shadow-lg rounded-xl text-black font-semibold cursor-pointer focus:ring-2 focus:ring-sky-400 focus:border-sky-600 transition-all appearance-none pr-10"
+                        onFocus={() => setIsSelectOpen(true)}
+                        onBlur={() => setIsSelectOpen(false)}
+                        onMouseDown={() => setIsSelectOpen(!isSelectOpen)}
+                      >
+                        <option value="" disabled>
+                          Select State/Organisation
                         </option>
-                      ))}
-                    </select>
+                        {orgOptions.map((org) => (
+                          <option key={org} value={org}>
+                            {org}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-sky-600 pointer-events-none transition-transform duration-200 ${isSelectOpen ? 'rotate-180' : ''}`} />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -125,7 +130,7 @@ export function RegisterForm() {
                       type="email"
                       placeholder="Enter Email"
                       {...field}
-                      className="h-12 px-4 bg-gray-300 text-black rounded-sm border-0 placeholder:text-gray-500 focus:bg-gray-200 cursor-pointer"
+                      className="h-12 px-4 border-2 border-sky-600 text-black rounded-xl placeholder:text-gray-500 focus:bg-gray-200 cursor-pointer"
                     />
                   </FormControl>
                   <FormMessage />
@@ -150,7 +155,7 @@ export function RegisterForm() {
                       type="password"
                       placeholder="Enter Password"
                       {...field}
-                      className="h-12 px-4 bg-gray-300 text-black rounded-sm border-0 placeholder:text-gray-500 focus:bg-gray-200 cursor-pointer"
+                      className="h-12 px-4 text-black rounded-xl border-2 border-sky-600 placeholder:text-gray-500 focus:bg-gray-200 cursor-pointer"
                     />
                   </FormControl>
                   <FormMessage />

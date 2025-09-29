@@ -159,6 +159,10 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
                 value={formData.mobile}
                 name="mobile"
                 onChange={handleChange}
+                type="tel"
+                pattern="[0-9]{10}"
+                maxLength={10}
+                minLength={10}
                 required
               />
             </div>
@@ -169,6 +173,9 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
                 value={formData.aadhar}
                 name="aadhar"
                 onChange={handleChange}
+                type="number"
+                minLength={12}
+                maxLength={12}
                 required
               />
             </div>

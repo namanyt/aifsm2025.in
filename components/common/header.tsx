@@ -108,27 +108,26 @@ export function Header() {
               <>
                 <Link
                   href="/dashboard"
-                  className="px-4 xl:px-6 py-2 bg-[#4169E1] rounded-lg flex justify-center items-center transition-colors hover:bg-[#274fa1] cursor-pointer"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="bg-[#4169E1] text-center text-white hover:bg-[#274fa1] px-6 py-3 rounded-md font-semibold inline-block"
                 >
-                  <span className="text-white text-sm font-medium font-['Inter'] leading-tight tracking-tight whitespace-nowrap">
-                    Dashboard
-                  </span>
+                  Dashboard
                 </Link>
-                <Button
-                  className="px-4 xl:px-6 py-2 bg-red-500 rounded-lg hover:bg-red-400"
+                <button
+                  className="bg-red-500 hover:bg-red-400 text-white cursor-pointer text-center px-6 py-3 rounded-md font-semibold"
                   onClick={() => {
                     pb.authStore.clear();
                     window.location.href = "/";
                   }}
                 >
                   Logout
-                </Button>
+                </button>
               </>
             ) : (
               <>
                 <Link
                   href="/login"
-                  className="px-4 xl:px-6 py-2 bg-[#4169E1] rounded-lg flex justify-center items-center transition-colors hover:bg-[#274fa1] cursor-pointer"
+                  className="px-4 xl:px-6 py-2 border-2 border-[#4169e1] bg-[#4169E1] rounded-lg flex justify-center items-center transition-colors hover:bg-[#274fa1] cursor-pointer"
                 >
                   <span className="text-white text-sm font-medium font-['Inter'] leading-tight tracking-tight whitespace-nowrap">
                     Login
@@ -174,12 +173,12 @@ export function Header() {
                   <Link
                     href="/dashboard"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="bg-[#4169E1] text-center text-white hover:bg-[#274fa1]"
+                    className="bg-[#4169E1] w-full text-center text-white hover:bg-[#274fa1] px-6 py-3 rounded-md font-semibold inline-block"
                   >
                     Dashboard
                   </Link>
                   <button
-                    className="bg-red-500 hover:bg-[#f87171] text-white cursor-pointer"
+                    className="bg-red-500 w-full hover:bg-red-400 text-white cursor-pointer text-center px-6 py-3 rounded-md font-semibold"
                     onClick={() => {
                       pb.authStore.clear();
                       window.location.href = "/";
@@ -208,9 +207,10 @@ export function Header() {
               )}
             </div>
           </div>
-        )}
-      </nav>
-    </div>
+        )
+        }
+      </nav >
+    </div >
   );
 }
 
