@@ -294,3 +294,145 @@ export const bloodGroups: BloodGroupType = {
   "O+": "O+",
   "O-": "O-",
 };
+
+export const COMMITTEES_DATA = [
+  {
+    id: 1,
+    name: "Accommodation Committee",
+    description:
+      "Arranging appropriate accommodation for all participants, guests, and officials including allowances.",
+    members: [
+      { name: "Shri B P Gupta", designation: "PCCF - Chairperson" },
+      { name: "Shri Sushant Patnaik", designation: "CCF" },
+      { name: "Shri Rajeev Dhiman", designation: "CF" },
+      { name: "Shri D P Balconi", designation: "DCF" },
+    ],
+  },
+  {
+    id: 2,
+    name: "Transport Committee",
+    description:
+      "Managing pick-up, drop, and daily transport services for participants and dignitaries between accommodation, sports venues, and event locations.",
+    members: [
+      { name: "Shri R K Mishra", designation: "PCCF - Chairman" },
+      { name: "Shri Naresh Kumar", designation: "APCCF" },
+      { name: "Shri Mahatim Yadav", designation: "DCF" },
+      { name: "Shri Jeevan Dagade", designation: "DCF" },
+      { name: "Shri Umesh Tiwari", designation: "DCF" },
+      { name: "RTO Dehradun or officer nominated by RTO Dehradun", designation: "" },
+    ],
+  },
+  {
+    id: 3,
+    name: "Catering and Food Committee",
+    description:
+      "Ensuring quality food and refreshments are provided to participants and guests at designated points and times.",
+    members: [
+      { name: "Smt Neena Grewal", designation: "PCCF- Chairperson" },
+      { name: "Dr.Vinay Bhargav", designation: "CF" },
+      { name: "Smt Abhilasha Singh", designation: "DCF" },
+      { name: "Shri Shiva Kant", designation: "DCF" },
+      { name: "Shri Sarvesh Kumar", designation: "DCF" },
+      { name: "Smt Pranali", designation: "IFS" },
+      { name: "Principal IIHM, Dehradun or officer nominated by IIHM, Dehradun", designation: "" },
+    ],
+  },
+  {
+    id: 4,
+    name: "Sports Committee",
+    description:
+      "Planning and coordination of all sporting events, team registrations, rules enforcement, venue preparation, and coordination with referees/officials.",
+    members: [
+      { name: "Dr S P Subudhi", designation: "PCCF- Chairman" },
+      { name: "Shri Nitish Mani Tripathi", designation: "CF" },
+      { name: "Shri Pankaj Kumar", designation: "CF" },
+      { name: "Shri C S Joshi", designation: "DCF" },
+      { name: "Shri Ashutosh Singh", designation: "DCF" },
+      { name: "Shri Abhimanyu", designation: "DCF" },
+      { name: "Shri Tarun S", designation: "DCF" },
+      { name: "Officer nominated by Special Principal Secretary Sports, Government of Uttarakhand", designation: "" },
+    ],
+  },
+  {
+    id: 5,
+    name: "Event Management and Cultural Committee",
+    description:
+      "Organizing inaugural and closing ceremonies, cultural programmes, stage setup, and anchoring support.",
+    members: [
+      { name: "Dr Dhreem Pandey", designation: "CCF- Chairman" },
+      { name: "Smt Kahkashan Naseem", designation: "CF" },
+      { name: "Shri Deepak Singh", designation: "DCF" },
+      { name: "Shri Amit Kanwar", designation: "DCF" },
+      { name: "Shri Rahul Mishra", designation: "DCF" },
+    ],
+  },
+  {
+    id: 6,
+    name: "Media and Publicity, IT & Control Room Committee",
+    description:
+      "Managing media relations, press releases, social media promotion, photography/videography, and internal communications.",
+    members: [
+      { name: "Smt Meenakshi Joshi", designation: "APCCF- Chairman" },
+      { name: "Shri Sanjeev Chaturvedi", designation: "CCF" },
+      { name: "Dr Parag M Dhakate", designation: "CF" },
+      { name: "Dr Saket Badola", designation: "CF" },
+      { name: "Shri Vaibhv Singh", designation: "DCF" },
+      { name: "Shri Aditya Rana", designation: "IFS" },
+      { name: "State informatic officer (SIO),NIC or officer nominated by SIO", designation: "" },
+      { name: "Officer nominated by DG information and public relation, Government of Uttarakhand", designation: "" },
+    ],
+  },
+  {
+    id: 7,
+    name: "Procurement and Finance Committee",
+    description: "Procurement of materials and services, financial planning, approvals, and expenditure tracking.",
+    members: [
+      { name: "Shri Kapil Lall", designation: "PCCF- Chairman" },
+      { name: "Shri P K Patro", designation: "CCF" },
+      { name: "Shri Himansn Bagdi", designation: "DFO" },
+      { name: "Shri Neeraj Kumar", designation: "DFO" },
+      { name: "Finance Controller Forest Department", designation: "" },
+      { name: "Finance officer, Uttarakhand CAMPA", designation: "" },
+      { name: "Officer nominated by Secretary Finance, Government of Uttarakhand", designation: "" },
+      { name: "Account officer nominated by PCCF(HoFF) Uttarakhand", designation: "" },
+    ],
+  },
+  {
+    id: 8,
+    name: "Protocol and Reception Committee",
+    description:
+      "Welcoming and coordinating logistics for dignitaries, VVIPs, and guests; ensuring protocol arrangements.",
+    members: [
+      { name: "Dr Vivek Pandey", designation: "APCCF- Chairman" },
+      { name: "Dr Koko Rose", designation: "CF" },
+      { name: "Shri Puneet Tomar", designation: "DCF" },
+      { name: "Shri Digant Nayak", designation: "DCF" },
+      { name: "Shri Rajar Suman", designation: "IFS" },
+    ],
+  },
+  {
+    id: 9,
+    name: "Result, Prize, Medal and Souvenir Committee",
+    description: "Preparation and distribution of prizes, medals, certificates, mementos, and souvenirs.",
+    members: [
+      { name: "Dr Parag M Dhakate", designation: "CCF- Chairman" },
+      { name: "Shri Akash Verma", designation: "CF" },
+      { name: "Smt Kalyani", designation: "DCF" },
+      { name: "Shri Kundan Kumar", designation: "DCF" },
+      { name: "Shri Swapnil", designation: "DCF" },
+    ],
+  },
+  {
+    id: 10,
+    name: "Medical and Emergency Committee",
+    description: "Arranging first aid, ambulances, on-call doctors, and health emergency management at all venues.",
+    members: [
+      { name: "Dr Tejasvini Patil", designation: "CCF - Chairperson" },
+      { name: "Shri T R Bijalal", designation: "CF" },
+      { name: "Shri Mayank Sekhar Jha", designation: "CF" },
+      { name: "Shri Akash Gangwar", designation: "DCF" },
+      { name: "Shri B B Martolia", designation: "DCF" },
+      { name: "Representative from Medical/ Healthcare Department", designation: "" },
+    ],
+  },
+];

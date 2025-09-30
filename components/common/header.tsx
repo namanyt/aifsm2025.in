@@ -39,14 +39,26 @@ export function Header() {
       {/* Top Logo Section */}
       <div className="w-full px-4 sm:px-6 md:px-12 lg:px-24 py-3 md:py-4 bg-white">
         <div className="flex justify-between items-center gap-2 sm:gap-4">
-          {/* Left Logos */}
+          {/* Left Logos - Increased sizes */}
           <div className="flex justify-start items-center gap-2 sm:gap-3 md:gap-5 flex-shrink-0">
-            <img className="w-8 h-8 sm:w-10 sm:h-10" src="/logos/uk_rajya.png" alt="UK Rajya Logo" />
-            <img className="w-8 h-8 sm:w-10 sm:h-10" src="/logos/uk_forest.png" alt="UK Forest Logo" />
+            <Image
+              className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20"
+              src="/logo.svg"
+              alt="UK Rajya Logo"
+              width={80}
+              height={80}
+            />
+            <Image
+              className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20"
+              src="/logos/uk_rajya.png"
+              alt="UK Forest Logo"
+              width={80}
+              height={80}
+            />
           </div>
 
           {/* Center Text - Hidden on mobile */}
-          <div className="hidden lg:block text-center flex-1 px-4">
+          <div className="hidden lg:block text-center flex-1 px-4 transform translate-x-10">
             <div className="text-black text-base xl:text-xl font-medium font-['Inter'] leading-relaxed tracking-tight">
               28th All India Forest Sports Meet, 2025
               <br />
@@ -57,16 +69,43 @@ export function Header() {
           </div>
 
           {/* Mobile Center Text - Visible only on mobile/tablet */}
-          <div className="lg:hidden text-center flex-1 px-2">
+          <div className="lg:hidden text-center flex-1 px-2 transform translate-x-10">
             <div className="text-black text-xs sm:text-sm md:text-base font-medium font-['Inter'] leading-snug">
               28th All India Forest Sports Meet, 2025
+              <br />
+              Uttarakhand Forest Department
+              <br />
+              Government of Uttarakhand
             </div>
           </div>
 
-          {/* Right Logos */}
+          {/* Right Logos - Increased sizes */}
+          {/* 3 logos this side */}
           <div className="flex justify-end items-center gap-2 sm:gap-3 md:gap-5 flex-shrink-0">
-            <img className="w-12 h-6 sm:w-16 sm:h-8 md:w-20 md:h-10" src="/logos/life_for_env.png" alt="Life for Environment Logo" />
-            <img className="w-8 h-8 sm:w-10 sm:h-10" src="/logos/nature_logo.png" alt="Nature Logo" />
+            <Image
+              className="w-8 h-8 sm:w-14 sm:h-14 md:w-18 md:h-18 lg:w-20 lg:h-20 transform translate-x-5"
+              src="/logos/van_vibhag.png"
+              alt="AIFSM Logo"
+              width={80}
+              height={80}
+            />
+          </div>
+          <div className="flex justify-end items-center gap-2 sm:gap-3 md:gap-5 flex-shrink-0">
+            <Image
+              className="w-16 h-8 sm:w-20 sm:h-10 md:w-24 md:h-12 lg:w-28 lg:h-14 transform translate-x-10"
+              src="/logos/life_for_env.png"
+              alt="Life for Environment Logo"
+              width={112}
+              height={56}
+            />
+            <Image
+              // className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20"
+              className="transform translate-x-10"
+              src="/logos/nature_logo.png"
+              alt="Nature Logo"
+              width={112}
+              height={80}
+            />
           </div>
         </div>
       </div>
@@ -80,11 +119,13 @@ export function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`px-3 xl:px-4 py-2 transition-colors rounded text-sm font-${isActive(item.href) ? "bold" : "medium"
-                  } font-['Inter'] leading-tight tracking-tight whitespace-nowrap
-                  ${isActive(item.href)
-                    ? "bg-green-900 text-white hover:bg-green-800"
-                    : "text-black hover:text-[#4169E1]"
+                className={`px-3 xl:px-4 py-2 transition-colors rounded text-sm font-${
+                  isActive(item.href) ? "bold" : "medium"
+                } font-['Inter'] leading-tight tracking-tight whitespace-nowrap
+                  ${
+                    isActive(item.href)
+                      ? "bg-green-900 text-white hover:bg-green-800"
+                      : "text-black hover:text-[#4169E1]"
                   }
                 cursor-pointer`}
               >
@@ -155,12 +196,10 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`block px-4 py-3 transition-colors rounded text-sm font-${isActive(item.href) ? "bold" : "medium"
-                  } font-['Inter']
-                  ${isActive(item.href)
-                    ? "bg-green-900 text-white"
-                    : "text-black hover:bg-gray-100"
-                  }`}
+                className={`block px-4 py-3 transition-colors rounded text-sm font-${
+                  isActive(item.href) ? "bold" : "medium"
+                } font-['Inter']
+                  ${isActive(item.href) ? "bg-green-900 text-white" : "text-black hover:bg-gray-100"}`}
               >
                 {item.label}
               </Link>
@@ -207,24 +246,16 @@ export function Header() {
               )}
             </div>
           </div>
-        )
-        }
-      </nav >
-    </div >
+        )}
+      </nav>
+    </div>
   );
 }
 
 export function Header_Image() {
   return (
     <div className="w-full h-[150px] sm:h-[200px] md:h-[250px] lg:h-[300px] relative">
-      <Image
-        src="/ui/header_image.png"
-        alt="About AIFSM 2025"
-        fill
-        className="object-cover"
-        priority
-        sizes="100vw"
-      />
+      <Image src="/ui/header_image.png" alt="About AIFSM 2025" fill className="object-cover" priority sizes="100vw" />
     </div>
   );
 }

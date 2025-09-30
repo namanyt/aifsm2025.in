@@ -82,8 +82,6 @@ export function LoginForm() {
 
   return (
     <div className="w-full flex flex-col items-center py-12 bg-white">
-      <h2 className="text-3xl font-bold text-center text-[#9E5700] mb-2">Login</h2>
-      <div className="w-16 h-1 bg-[#9E5700] mx-auto mb-8 rounded" />
       <div className="w-full max-w-xl">
         <Form {...form}>
           <div className="space-y-6">
@@ -113,8 +111,9 @@ export function LoginForm() {
                         ))}
                       </select>
                       <ChevronDown
-                        className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-sky-600 pointer-events-none transition-transform duration-200 ${isSelectOpen ? "rotate-180" : ""
-                          }`}
+                        className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-sky-600 pointer-events-none transition-transform duration-200 ${
+                          isSelectOpen ? "rotate-180" : ""
+                        }`}
                       />
                     </div>
                   </FormControl>
@@ -199,10 +198,7 @@ export function LoginForm() {
       <ResetPasswordDialog open={showReset} onClose={() => setShowReset(false)} onSubmit={handleResetPassword} />
 
       {/* Forgot Password Dialog */}
-      <ForgotPasswordDialog
-        open={showForgotPassword}
-        onClose={() => setShowForgotPassword(false)}
-      />
+      <ForgotPasswordDialog open={showForgotPassword} onClose={() => setShowForgotPassword(false)} />
     </div>
   );
 }
