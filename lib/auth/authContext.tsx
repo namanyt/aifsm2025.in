@@ -28,7 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ cookie: cookieStr }),
         });
-        
+
         if (!response.ok) {
           console.error("Failed to set session cookie:", response.statusText);
         }
@@ -43,33 +43,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     try {
-      console.log("🔄 Attempting to login with PocketBase...");
+      // console.log("🔄 Attempting to login with PocketBase...");
       const authData = await pb.collection("users").authWithPassword(email, password);
-      console.log("✅ PocketBase authentication successful");
-      console.log("📋 Auth data:", { user: authData.record.email, id: authData.record.id });
-      
+      // console.log("✅ PocketBase authentication successful");
+      // console.log("📋 Auth data:", { user: authData.record.email, id: authData.record.id });
+
       setUser(pb.authStore.record);
       const cookieStr = pb.authStore.exportToCookie(); // PocketBase cookie string
-      console.log("🍪 Exported cookie string:", cookieStr.substring(0, 50) + "...");
+      // console.log("🍪 Exported cookie string:", cookieStr.substring(0, 50) + "...");
 
       // Send cookie to server so SSR pages can read it
-      console.log("🔄 Sending cookie to session API...");
+      // console.log("🔄 Sending cookie to session API...");
       const response = await fetch("/api/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cookie: cookieStr }),
       });
-      
+
       if (!response.ok) {
-        console.error("❌ Failed to set session cookie:", response.statusText);
+        // console.error("❌ Failed to set session cookie:", response.statusText);
         const errorText = await response.text();
-        console.error("❌ Response body:", errorText);
+        // console.error("❌ Response body:", errorText);
         throw new Error(`Failed to set session cookie: ${response.statusText}`);
       }
-      
-      console.log("✅ Session cookie set successfully");
+
+      // console.log("✅ Session cookie set successfully");
     } catch (error) {
-      console.error("❌ Login error:", error);
+      // console.error("❌ Login error:", error);
       throw error;
     }
   };
@@ -83,12 +83,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await fetch("/api/session", {
         method: "DELETE",
       });
-      
+
       if (!response.ok) {
-        console.error("Failed to clear session cookie:", response.statusText);
+        // console.error("Failed to clear session cookie:", response.statusText);
       }
     } catch (error) {
-      console.error("Error clearing session cookie:", error);
+      // console.error("Error clearing session cookie:", error);
     }
   };
 

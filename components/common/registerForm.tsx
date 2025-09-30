@@ -36,7 +36,7 @@ export function RegisterForm() {
       password: data.password,
       org: data.org,
     };
-    console.log("Registration data:", output);
+    // console.log("Registration data:", output);
 
     // Always check password correctness first
     login(output.email, output.password)

@@ -2,11 +2,21 @@
 
 import { Player } from "@/lib/types";
 import { Button } from "./ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Edit } from "lucide-react";
 
 import { sportsData, bloodGroups } from "@/lib/types";
+
+const tShirtSizes = {
+  XS: "XS",
+  S: "S",
+  M: "M",
+  L: "L",
+  XL: "XL",
+  XXL: "XXL",
+  XXXL: "XXXL"
+};
 
 import {
   Dialog,
@@ -20,14 +30,53 @@ import {
 import { updatePlayer, getPlayer, db } from "@/lib/db/pb";
 import { deletePlayer } from "@/lib/db/pb";
 import { toast } from "sonner";
+import { TravelPlanDialog } from "./travelPlanDialog";
 
-export function PlayerCard({ player, index }: { player: Player; index: number }) {
+export function PlayerCard({
+  player,
+  index,
+  onUpdate,
+  onDelete
+}: {
+  player: Player;
+  index: number;
+  onUpdate?: (updatedPlayer: Player) => void;
+  onDelete?: (playerId: string) => void;
+}) {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [viewMode, setViewMode] = useState(false);
+  const [travelPlanDialogOpen, setTravelPlanDialogOpen] = useState(false);
+  const [viewMode, setViewMode] = useState(true);
   const [formData, setFormData] = useState({ ...player });
   const [selectedSport, setSelectedSport] = useState("");
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [aadharError, setAadharError] = useState("");
+
+  // Validate Aadhar number
+  const validateAadhar = (aadharNumber: string): string => {
+    // Remove any spaces or special characters
+    const cleanAadhar = aadharNumber.replace(/\D/g, '');
+
+    if (cleanAadhar.length !== 12) {
+      return "Aadhar number must be exactly 12 digits";
+    }
+
+    if (cleanAadhar.startsWith('0') || cleanAadhar.startsWith('1')) {
+      return "Aadhar number cannot start with 0 or 1";
+    }
+
+    if (!/^\d{12}$/.test(cleanAadhar)) {
+      return "Aadhar number must contain only digits";
+    }
+
+    return "";
+  };
+
+  // Use effect to update formData when player prop changes
+  useEffect(() => {
+    setFormData({ ...player });
+  }, [player]);
 
   // Reset subcategory and gender when sport changes
   const handleSportChange = (sport: string) => {
@@ -57,7 +106,22 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
   // Handle form field changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "aadhar") {
+      // Only allow digits and limit to 12 characters
+      const cleanValue = value.replace(/\D/g, '').slice(0, 12);
+      setFormData((prev) => ({ ...prev, [name]: cleanValue }));
+
+      // Validate Aadhar if it's 12 digits
+      if (cleanValue.length === 12) {
+        const error = validateAadhar(cleanValue);
+        setAadharError(error);
+      } else {
+        setAadharError(cleanValue.length > 0 ? "Aadhar number must be 12 digits" : "");
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   // Handle file input changes
@@ -81,12 +145,47 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
   // Save handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate Aadhar before submission
+    if (formData.aadhar) {
+      const aadharValidationError = validateAadhar(formData.aadhar);
+      if (aadharValidationError) {
+        setAadharError(aadharValidationError);
+        toast.error("Please enter a valid Aadhar number");
+        return;
+      }
+    }
+
+    setLoading(true);
     try {
       await updatePlayer(player.id, formData);
-      setDialogOpen(false);
-      window.location.reload(); // Refresh to show updated data
+      setViewMode(true);
+      toast.success("Player updated successfully!");
+      // Update parent component's state if callback provided
+      if (onUpdate) {
+        onUpdate({ ...player, ...formData });
+      }
     } catch (err) {
-      alert("Failed to update player");
+      toast.error("Failed to update player");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Delete handler
+  const handleDelete = async () => {
+    if (window.confirm("Are you sure you want to delete this player?")) {
+      try {
+        await deletePlayer(player.id);
+        setDialogOpen(false);
+        toast.success("Player deleted successfully!");
+        // Update parent component's state if callback provided
+        if (onDelete) {
+          onDelete(player.id);
+        }
+      } catch (err) {
+        toast.error("Failed to delete player");
+      }
     }
   };
 
@@ -113,6 +212,11 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
   // Toggle between view and edit modes
   const toggleEditMode = () => {
     setViewMode(!viewMode);
+    if (viewMode) {
+      // Entering edit mode - reset form data and clear errors
+      setFormData({ ...player });
+      setAadharError("");
+    }
   };
 
   return (
@@ -128,9 +232,7 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
       <div className="flex justify-between mt-4 gap-2">
         <Button
           className="bg-blue-500 text-white px-4 py-2 rounded-lg cursor-pointer flex-1"
-          onClick={() => {
-            alert(`Upload Travel Plan for ${player.name}`);
-          }}
+          onClick={() => setTravelPlanDialogOpen(true)}
         >
           Upload Travel Plan
         </Button>
@@ -223,6 +325,24 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
                 </select>
               </div>
               <div className="flex flex-col w-full space-y-2">
+                <label className="font-semibold text-gray-700">Select T-Shirt Size</label>
+                <select
+                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${viewMode ? "cursor-default" : "cursor-pointer"
+                    }`}
+                  value={formData.tShirtSize || ""}
+                  name="tShirtSize"
+                  onChange={handleChange}
+                  disabled={viewMode}
+                >
+                  <option value="">Select T-Shirt Size</option>
+                  {Object.entries(tShirtSizes).map(([key, value]) => (
+                    <option key={key} value={value}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col w-full space-y-2">
                 <label className="font-semibold text-gray-700">Enter Mobile Number</label>
                 <input
                   className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${viewMode ? "cursor-default" : "cursor-pointer"
@@ -236,13 +356,19 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
               <div className="flex flex-col w-full space-y-2">
                 <label className="font-semibold text-gray-700">Enter Aadhar Card</label>
                 <input
-                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${viewMode ? "cursor-default" : "cursor-pointer"
-                    }`}
+                  className={`bg-gray-50 rounded-md px-4 py-3 border ${aadharError && !viewMode ? 'border-red-500' : 'border-gray-300'
+                    } ${viewMode ? "cursor-default" : "cursor-pointer"}`}
                   value={formData.aadhar}
                   name="aadhar"
                   onChange={handleChange}
                   readOnly={viewMode}
+                  type="text"
+                  placeholder="Enter 12-digit Aadhar number"
+                  maxLength={12}
                 />
+                {aadharError && !viewMode && (
+                  <span className="text-red-500 text-sm">{aadharError}</span>
+                )}
               </div>
               <div className="flex flex-col w-full space-y-2">
                 <label className="font-semibold text-gray-700">Enter Employee ID</label>
@@ -454,18 +580,7 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
                   <Button
                     type="button"
                     className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors shadow-lg cursor-pointer"
-                    onClick={async () => {
-                      if (confirm("Are you sure you want to remove this player?")) {
-                        try {
-                          await deletePlayer(player.id);
-                          setDialogOpen(false);
-                          window.location.reload();
-                          toast("Player removed successfully");
-                        } catch (err) {
-                          alert("Failed to remove player");
-                        }
-                      }
-                    }}
+                    onClick={handleDelete}
                   >
                     Remove Player
                   </Button>
@@ -476,6 +591,7 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
                       onClick={() => {
                         setViewMode(true);
                         setFormData({ ...player }); // Reset form data
+                        setAadharError(""); // Clear validation errors
                       }}
                     >
                       Cancel
@@ -483,8 +599,9 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
                     <Button
                       type="submit"
                       className="bg-sky-600 hover:bg-sky-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors shadow-lg cursor-pointer"
+                      disabled={loading}
                     >
-                      Save Changes
+                      {loading ? "Saving..." : "Save Changes"}
                     </Button>
                   </div>
                 </div>
@@ -493,6 +610,14 @@ export function PlayerCard({ player, index }: { player: Player; index: number })
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Travel Plan Dialog */}
+      <TravelPlanDialog
+        player={player}
+        isOpen={travelPlanDialogOpen}
+        onClose={() => setTravelPlanDialogOpen(false)}
+        onUpdate={onUpdate}
+      />
     </div>
   );
 }

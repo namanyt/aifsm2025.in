@@ -54,13 +54,27 @@ export type Player = {
   age: number;
   bloodGroup: string;
   mobile: string;
-  aadhar: number;
+  aadhar: string;
   employeeId: string;
   event: string;
   healthIssues?: string;
   mealType: "Veg" | "Non-Veg" | "None" | "Both";
+  tShirtSize: "XS" | "S" | "M" | "L" | "XL" | "XXL" | "XXXL";
   profilePicture: File;
   employeeIDCard: File;
+  modeOfTravel?: string;
+  travelPlan?: File | string;
+  travelPlanName?: string;
+  travelPlanType?: string;
+  lastUpdated?: string;
+};
+
+export type TravelPlanData = {
+  modeOfTravel?: string;
+  travelPlan?: File | string;
+  travelPlanName?: string;
+  travelPlanType?: string;
+  lastUpdated?: string;
 };
 
 export type SportsDataType = {
@@ -268,7 +282,7 @@ export const sportsData: SportsDataType = {
 
 type BloodGroupType = {
   [key: string]: string;
-}
+};
 
 export const bloodGroups: BloodGroupType = {
   "A+": "A+",

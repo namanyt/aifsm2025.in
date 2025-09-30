@@ -11,10 +11,12 @@ import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { ResetPasswordDialog } from "./ResetPasswordDialog";
+import { ForgotPasswordDialog } from "./ForgotPasswordDialog";
 
 export function LoginForm() {
   let [isSelectOpen, setIsSelectOpen] = useState(false);
   const [showReset, setShowReset] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [pendingCreds, setPendingCreds] = useState<{ email: string; password: string } | null>(null);
   // TODO: Replace this with your actual default password value
   const DEFAULT_PASSWORD = "changeme";
@@ -59,7 +61,7 @@ export function LoginForm() {
       password: data.password,
       org: data.org,
     };
-    console.log("Login data:", output);
+    // console.log("Login data:", output);
     // Handle form submission here
 
     // Always check password correctness first
@@ -183,15 +185,24 @@ export function LoginForm() {
         </Form>
 
         {/* for forgot password */}
-        {/*TODO: AFTER SMTP is setup SET THIS FORM */}
         <div className="mt-4">
-          <Link href="/login/forgot" className="text-sm text-sky-600 hover:underline cursor-pointer">
+          <button
+            type="button"
+            onClick={() => setShowForgotPassword(true)}
+            className="text-sm text-sky-600 hover:underline cursor-pointer bg-transparent border-none p-0"
+          >
             Forgot Password?
-          </Link>
+          </button>
         </div>
       </div>
       {/* Password Reset Dialog */}
       <ResetPasswordDialog open={showReset} onClose={() => setShowReset(false)} onSubmit={handleResetPassword} />
+
+      {/* Forgot Password Dialog */}
+      <ForgotPasswordDialog
+        open={showForgotPassword}
+        onClose={() => setShowForgotPassword(false)}
+      />
     </div>
   );
 }

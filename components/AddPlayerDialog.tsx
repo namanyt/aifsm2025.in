@@ -1,19 +1,31 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { createPlayer } from "@/lib/db/pb";
 import { sportsData, bloodGroups } from "@/lib/types";
 import type { Player } from "@/lib/types";
 import { toast } from "sonner";
+import { useAuth } from "@/lib/auth/authContext";
+
+const tShirtSizes = {
+  XS: "XS",
+  S: "S",
+  M: "M",
+  L: "L",
+  XL: "XL",
+  XXL: "XXL",
+  XXXL: "XXXL"
+};
 
 const initialPlayerState: Omit<Player, "id"> = {
   organisation: "",
   name: "",
   age: 18,
   bloodGroup: "",
+  tShirtSize: undefined as any,
   mobile: "",
-  aadhar: 0,
+  aadhar: "",
   employeeId: "",
   event: "",
   healthIssues: "",
@@ -22,13 +34,50 @@ const initialPlayerState: Omit<Player, "id"> = {
   employeeIDCard: undefined as any,
 };
 
-export function AddPlayerDialog({ userId }: { userId: string }) {
+export function AddPlayerDialog({
+  userId,
+  onPlayerAdded
+}: {
+  userId: string;
+  onPlayerAdded?: (newPlayer: Player) => void;
+}) {
+  const { user } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formData, setFormData] = useState({ ...initialPlayerState });
   const [selectedSport, setSelectedSport] = useState("");
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
   const [loading, setLoading] = useState(false);
+  const [aadharError, setAadharError] = useState("");
+
+  // Validate Aadhar number
+  const validateAadhar = (aadharNumber: string): string => {
+    // Remove any spaces or special characters
+    const cleanAadhar = aadharNumber.replace(/\D/g, '');
+
+    if (cleanAadhar.length !== 12) {
+      return "Aadhar number must be exactly 12 digits";
+    }
+
+    if (cleanAadhar.startsWith('0') || cleanAadhar.startsWith('1')) {
+      return "Aadhar number cannot start with 0 or 1";
+    }
+
+    if (!/^\d{12}$/.test(cleanAadhar)) {
+      return "Aadhar number must contain only digits";
+    }
+
+    return "";
+  };
+
+  // Pre-fill organisation when user data is available
+  useEffect(() => {
+    if (user?.org) {
+      setFormData(prev => ({ ...prev, organisation: user.org }));
+    }
+
+    // console.log("User data in AddPlayerDialog:", user);
+  }, [user]);
 
   const handleSportChange = (sport: string) => {
     setSelectedSport(sport);
@@ -49,7 +98,22 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
   };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "aadhar") {
+      // Only allow digits and limit to 12 characters
+      const cleanValue = value.replace(/\D/g, '').slice(0, 12);
+      setFormData((prev) => ({ ...prev, [name]: cleanValue }));
+
+      // Validate Aadhar if it's 12 digits
+      if (cleanValue.length === 12) {
+        const error = validateAadhar(cleanValue);
+        setAadharError(error);
+      } else {
+        setAadharError(cleanValue.length > 0 ? "Aadhar number must be 12 digits" : "");
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, files } = e.target;
@@ -68,17 +132,30 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate Aadhar before submission
+    if (formData.aadhar) {
+      const aadharValidationError = validateAadhar(formData.aadhar);
+      if (aadharValidationError) {
+        setAadharError(aadharValidationError);
+        toast.error("Please enter a valid Aadhar number");
+        return;
+      }
+    }
+
     setLoading(true);
     try {
-      await createPlayer({ ...formData, RegisteredBy: userId });
+      const newPlayer = await createPlayer({ ...formData, RegisteredBy: userId });
       setDialogOpen(false);
-      setFormData({ ...initialPlayerState });
+      setFormData({ ...initialPlayerState, organisation: user?.org || "" });
       setSelectedSport("");
       setSelectedSubCategory("");
       setSelectedGender("");
-      // Optionally: refresh page or show notification
-      toast("Player registered successfully!");
-      window.location.reload();
+      toast.success("Player registered successfully!");
+      // Notify parent component if callback provided
+      if (onPlayerAdded && newPlayer) {
+        onPlayerAdded({ ...formData, id: newPlayer.id } as Player);
+      }
     } catch (err) {
       toast.error("Failed to register player");
     } finally {
@@ -90,7 +167,10 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
     <div className="flex flex-col items-center">
       <Button
         className="bg-blue-500 text-white px-6 py-2 rounded-lg cursor-pointer"
-        onClick={() => setDialogOpen(true)}
+        onClick={() => {
+          setDialogOpen(true);
+          setAadharError(""); // Clear any previous validation errors
+        }}
       >
         Register New Player
       </Button>
@@ -107,10 +187,12 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
             <div className="flex flex-col w-full space-y-2">
               <label className="font-semibold text-gray-700">Organization</label>
               <input
-                className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
+                className="bg-gray-100 rounded-md px-4 py-3 border border-gray-300 cursor-not-allowed"
                 value={formData.organisation}
                 name="organisation"
                 onChange={handleChange}
+                readOnly
+                placeholder="Organisation will be auto-filled from your profile"
                 required
               />
             </div>
@@ -153,6 +235,23 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
               </select>
             </div>
             <div className="flex flex-col w-full space-y-2">
+              <label className="font-semibold text-gray-700">Select T-Shirt Size</label>
+              <select
+                className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
+                value={formData.tShirtSize}
+                name="tShirtSize"
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select T-Shirt Size</option>
+                {Object.entries(tShirtSizes).map(([key, value]) => (
+                  <option key={key} value={value}>
+                    {value}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col w-full space-y-2">
               <label className="font-semibold text-gray-700">Enter Mobile Number</label>
               <input
                 className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
@@ -169,15 +268,19 @@ export function AddPlayerDialog({ userId }: { userId: string }) {
             <div className="flex flex-col w-full space-y-2">
               <label className="font-semibold text-gray-700">Enter Aadhar Card</label>
               <input
-                className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
+                className={`bg-gray-50 rounded-md px-4 py-3 border ${aadharError ? 'border-red-500' : 'border-gray-300'
+                  } cursor-pointer`}
                 value={formData.aadhar}
                 name="aadhar"
                 onChange={handleChange}
-                type="number"
-                minLength={12}
+                type="text"
+                placeholder="Enter 12-digit Aadhar number"
                 maxLength={12}
                 required
               />
+              {aadharError && (
+                <span className="text-red-500 text-sm">{aadharError}</span>
+              )}
             </div>
             <div className="flex flex-col w-full space-y-2">
               <label className="font-semibold text-gray-700">Enter Employee ID</label>
