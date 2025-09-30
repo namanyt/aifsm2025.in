@@ -436,3 +436,76 @@ export const COMMITTEES_DATA = [
     ],
   },
 ];
+
+// Categorized events data based on SportsEvents categories
+export const categorizedEvents = {
+  Athletics: sportsData.Athletics || {},
+  Swimming: sportsData.Swimming || {},
+  "Power Lifting": sportsData["Power Lifting"] || {},
+  "Weight Lifting": sportsData["Weight Lifting"] || {},
+  "Indoor Games": {
+    "Chess - Classic": sportsData.Chess?.Classic || [],
+    "Chess - Rapid": sportsData.Chess?.Rapid || [],
+    "Carrom - Singles": sportsData.Carrom?.Singles || [],
+    "Carrom - Doubles": sportsData.Carrom?.Doubles || [],
+    "Carrom - Mixed Doubles": sportsData.Carrom?.["Mixed Doubles"] || [],
+    "Table Tennis - Singles": sportsData["Table Tennis"]?.Singles || [],
+    "Table Tennis - Doubles": sportsData["Table Tennis"]?.Doubles || [],
+    "Table Tennis - Mixed Doubles": sportsData["Table Tennis"]?.["Mixed Doubles"] || [],
+    "Badminton - Singles": sportsData.Badminton?.Singles || [],
+    "Badminton - Doubles": sportsData.Badminton?.Doubles || [],
+    "Badminton - Mixed Doubles": sportsData.Badminton?.["Mixed Doubles"] || [],
+    "Billiards - Open for All": sportsData.Billiards?.["Open for All"] || [],
+    "Snooker - Open for All": sportsData.Snooker?.["Open for All"] || [],
+    "Squash - Singles": sportsData.Squash?.Singles || [],
+    "Quiz - Team": sportsData.Quiz?.Team || [],
+    "Bridge - Team Duplicate": sportsData.Bridge?.["Team Duplicate"] || [],
+    "Bridge - Master Pair": sportsData.Bridge?.["Master Pair"] || [],
+    "Bridge - Progressive": sportsData.Bridge?.Progressive || [],
+  },
+  "Field Games": {
+    "Cricket - Team": sportsData.Cricket?.Team || [],
+    "Hockey - Team": sportsData.Hockey?.Team || [],
+    "Volleyball - Team": sportsData.Volleyball?.Team || [],
+    "Basketball - Team": sportsData.Basketball?.Team || [],
+    "Football - Team": sportsData.Football?.Team || [],
+    "Kabaddi - Team": sportsData.Kabaddi?.Team || [],
+    "Tug of War - Team": sportsData["Tug of War"]?.Team || [],
+    "Lawn Tennis - Singles": sportsData["Lawn Tennis"]?.Singles || [],
+    "Lawn Tennis - Doubles": sportsData["Lawn Tennis"]?.Doubles || [],
+    "Lawn Tennis - Mixed Doubles": sportsData["Lawn Tennis"]?.["Mixed Doubles"] || [],
+  },
+  "Rifle Shooting": sportsData["Rifle Shooting"] || {},
+  Cycling: sportsData.Cycling || {},
+  Archery: sportsData.Archery || {},
+  Golf: sportsData.Golf || {},
+};
+
+export const SportsEventsIcons = [
+  { name: "Athletics", icon: "athletics.png" },
+  { name: "Swimming", icon: "swimming.png" },
+  { name: "Power Lifting", icon: "weights.png" },
+  { name: "Weight Lifting", icon: "weights.png" },
+  { name: "Indoor Games", icon: "indoor.png" },
+  { name: "Field Games", icon: "field.png" },
+  { name: "Rifle Shooting", icon: "rifle.png" },
+  { name: "Cycling", icon: "cycling.png" },
+  { name: "Archery", icon: "archery.png" },
+  { name: "Golf", icon: "golf.png" },
+];
+
+export const EventIcons = [
+  { name: "Archery", icon: "archery.svg" },
+  { name: "Athletics", icon: "athletics.svg" },
+  { name: "Swimming", icon: "swimming.svg" },
+  { name: "Power Lifting", icon: "weight.svg" },
+  { name: "Weight Lifting", icon: "weight.svg" },
+  { name: "Indoor Games", icon: "indoor.svg" },
+  { name: "Field Games", icon: "field.svg" },
+  { name: "Rifle Shooting", icon: "rifle.svg" },
+  { name: "Cycling", icon: "cycling.svg" },
+  { name: "Golf", icon: "golf.svg" },
+];
+
+export const COMMITTEE_PDF =
+  "https://db.aifsm2025.in/api/files/9wsix8u79jd2wni/zec8p3667qco415/aifsm_office_order_XpZGY8hFet.pdf";

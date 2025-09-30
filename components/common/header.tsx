@@ -35,7 +35,7 @@ export function Header() {
   };
 
   return (
-    <div className="w-full shadow-lg sticky top-0 z-50 bg-white">
+    <div className="w-full shadow-lg top-0 z-50 bg-white">
       {/* Top Logo Section */}
       <div className="w-full px-4 sm:px-6 md:px-12 lg:px-24 py-3 md:py-4 bg-white">
         <div className="flex justify-between items-center gap-2 sm:gap-4">
@@ -252,10 +252,47 @@ export function Header() {
   );
 }
 
-export function Header_Image() {
+export type HeaderImageProps = {
+  image: "default" | "about" | "contact" | "events" | "committee" | "gallery" | "results";
+};
+
+export function Header_Image({ image }: HeaderImageProps) {
+  let img = "/ui/header_image.png";
+  switch (image) {
+    case "about":
+      img = "/ui/header_about.png";
+      break;
+    case "contact":
+      img = "/ui/header_contact.png";
+      break;
+    case "events":
+      img = "/ui/header_events.png";
+      break;
+    case "committee":
+      img = "/ui/header_committee.png";
+      break;
+    case "gallery":
+      img = "/ui/header_gallery.png";
+      break;
+    case "results":
+      img = "/ui/header_results.png";
+      break;
+    case "default":
+    default:
+      img = "/ui/header_image.png";
+      break;
+  }
+
   return (
     <div className="w-full h-[150px] sm:h-[200px] md:h-[250px] lg:h-[300px] relative">
-      <Image src="/ui/header_image.png" alt="About AIFSM 2025" fill className="object-cover" priority sizes="100vw" />
+      <Image
+        src={img}
+        alt={`${image.charAt(0).toUpperCase() + image.slice(1)} AIFSM 2025`}
+        fill
+        className="object-cover"
+        priority
+        sizes="100vw"
+      />
     </div>
   );
 }

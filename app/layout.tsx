@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Rampart_One } from "next/font/google";
+import { Inter, Rampart_One, Urbanist } from "next/font/google";
 import "./globals.css";
 
 import { Header } from "@/components/common/header";
@@ -16,6 +16,13 @@ const rampart = Rampart_One({
   variable: "--font-rampart-one",
   subsets: ["latin"],
   weight: "400",
+});
+
+const urbanist = Urbanist({
+  variable: "--font-urbanist",
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -68,7 +75,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
-      <body className={`${inter.variable} ${rampart.variable} antialiased`}>
+      <body className={`${inter.variable} ${rampart.variable} ${urbanist.variable} antialiased`}>
         <Header />
         <AuthProvider>
           <main className="">{children}</main>

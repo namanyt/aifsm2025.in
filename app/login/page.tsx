@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function Login() {
   return (
     <div className="relative min-h-screen">
-      <Header_Image />
+      <Header_Image image="default" />
 
       <div className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 top-[75px] sm:top-[100px] md:top-[125px] lg:top-[150px] text-center z-10">
         <div className="bg-white/20 dark:bg-gray-400/40 backdrop-blur-md border border-white/30 rounded-2xl py-3 px-6 sm:py-4 sm:px-8 md:py-6 md:px-12 shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-3xl hover:bg-white/25">
