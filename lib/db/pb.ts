@@ -25,3 +25,7 @@ export async function getPlayer(id: string) {
 export async function deletePlayer(id: string) {
   return pb.collection("players").delete(id);
 }
+
+export async function listNews() {
+  return pb.collection("news").getFullList();
+}

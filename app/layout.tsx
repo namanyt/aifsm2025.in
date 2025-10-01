@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     default: "AIFSM 2025",
     template: "%s | AIFSM 2025",
   },
-  description: "AIFSM 2025 - All India Forest Sports Meet 2025",
+  description: "Official AIFSM 2025 - All India Forest Sports Meet 2025",
   authors: [
     { name: "Nitya Naman", url: "https://ciderboi.xyz" },
     { name: "Amritanshu Rawat" },
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   ],
   creator: "Nitya Naman",
   abstract: "All India Forest Sports Meet 2025",
-  category: "Sports",
+  category: "sports",
   classification: "Sports Event",
   referrer: "origin-when-cross-origin",
   keywords: [
@@ -57,6 +57,44 @@ export const metadata: Metadata = {
   ],
   icons: {
     icon: "/logo.ico",
+  },
+  alternates: {
+    canonical: "https://aifsm2025.in",
+  },
+  openGraph: {
+    title: "AIFSM 2025",
+    description: "All details about AIFSM 2025 — Schedule, Events, Results.",
+    url: "https://aifsm2025.in",
+    siteName: "AIFSM 2025",
+    locale: "en_IN",
+    type: "website",
+    images: [
+      {
+        url: "https://aifsm2025.in/logo.svg",
+        width: 1200,
+        height: 630,
+        alt: "AIFSM 2025 Logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@aifsm2025", // if you have a Twitter handle
+    creator: "@aifsm2025",
+    title: "AIFSM 2025",
+    description: "Official website for AIFSM 2025",
+    images: ["https://aifsm2025.in/logo.svg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-snippet": -1,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
+    },
   },
   // add other metadata: open graph metadata and twitter card metadata
 };

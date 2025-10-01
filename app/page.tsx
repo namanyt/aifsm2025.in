@@ -1,10 +1,78 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 
 import { Countdown } from "@/components/others/countdown";
 import { ExternalLinkIcon, Link2Icon } from "lucide-react";
+import { useState, useEffect } from "react";
+
+type NewsType = {
+  id: string;
+  created: Date;
+  updated: Date;
+  news: string;
+};
 
 export default function HomePage() {
+  const [news, setNews] = useState<NewsType[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
+
+  useEffect(() => {
+    // Fetch news from the API endpoint
+    fetch("/api/news")
+      .then((response) => response.json())
+      .then((data) => {
+        setNews(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching news:", error);
+      });
+  }, []);
+
+  // Function to parse text and make URLs clickable
+  const parseNewsText = (text: string) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+
+    return parts.map((part, index) => {
+      if (urlRegex.test(part)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 underline font-medium"
+          >
+            Link
+          </a>
+        );
+      }
+      return part;
+    });
+  };
+
+  // Pagination logic
+  const sortedNews = news.sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());
+  const totalPages = Math.ceil(sortedNews.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentNews = sortedNews.slice(startIndex, endIndex);
+
+  const goToPage = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const goToPrevious = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const goToNext = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
+
   const sportsEvents = [
     { name: "Athletics", icon: "🏃‍♂️" },
     { name: "Swimming", icon: "🏊‍♂️" },
@@ -28,23 +96,23 @@ export default function HomePage() {
     { name: "Sports Meet Result", content: "#" },
   ];
 
-  const newsItems = [
-    {
-      date: "Sep 2025",
-      title: "Dehradun Hosts Inter-State Cricket Championship",
-      subtitle: "Record Participation in Dehradun Half Marathon",
-    },
-    {
-      date: "Sep 2025",
-      title: "Dehradun Hosts Inter-State Cricket Championship",
-      subtitle: "Record Participation in Dehradun Half Marathon",
-    },
-    {
-      date: "Sep 2025",
-      title: "Dehradun Hosts Inter-State Cricket Championship",
-      subtitle: "Record Participation in Dehradun Half Marathon",
-    },
-  ];
+  // let newsItems = [
+  //   {
+  //     date: "Sep 2025",
+  //     title: "Dehradun Hosts Inter-State Cricket Championship",
+  //     subtitle: "Record Participation in Dehradun Half Marathon",
+  //   },
+  //   {
+  //     date: "Sep 2025",
+  //     title: "Dehradun Hosts Inter-State Cricket Championship",
+  //     subtitle: "Record Participation in Dehradun Half Marathon",
+  //   },
+  //   {
+  //     date: "Sep 2025",
+  //     title: "Dehradun Hosts Inter-State Cricket Championship",
+  //     subtitle: "Record Participation in Dehradun Half Marathon",
+  //   },
+  // ];
 
   const stateSymbols = [
     {
@@ -200,31 +268,106 @@ export default function HomePage() {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-semibold text-yellow-700 mb-4">Latest News</h2>
+            <h2 className="text-3xl font-semibold text-yellow-700 mb-4">Latest Updates</h2>
             <div className="w-12 h-1 bg-yellow-700 mx-auto" />
           </div>
 
-          <div className="space-y-6 sm:space-y-8 max-w-4xl mx-auto">
-            {newsItems.map((item, index) => (
-              <article key={index} className="flex flex-col sm:flex-row rounded-xl overflow-hidden shadow-lg">
-                <div className="w-full sm:w-2/5 bg-gradient-to-b from-black/0 to-black/40 bg-gray-800 p-4 sm:p-6 flex items-center">
-                  <div className="flex items-center gap-3 w-full">
-                    <div className="p-2.5 bg-orange-500 rounded-lg flex-shrink-0">
-                      <div className="w-6 h-6 sm:w-8 sm:h-8">
-                        <ExternalLinkIcon size={24} className="sm:w-8 sm:h-8" />
+          <div className="max-w-4xl mx-auto">
+            {/* News Content */}
+            <div className="bg-gray-50 rounded-lg border border-gray-200 min-h-[300px]">
+              {news && news.length > 0 ? (
+                <>
+                  <div className="divide-y divide-gray-200">
+                    {currentNews.map((item, index) => (
+                      <div key={item.id} className="p-6 hover:bg-white transition-colors duration-200">
+                        <div className="flex items-start gap-4">
+                          <div className="flex-shrink-0">
+                            <div className="w-12 h-12 bg-yellow-600 rounded-lg flex items-center justify-center">
+                              <ExternalLinkIcon size={20} className="text-white" />
+                            </div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                Notice
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                {new Date(item.created).toLocaleDateString("en-US", {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                })}
+                              </span>
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2 leading-tight">
+                              {parseNewsText(item.news)}
+                            </h3>
+                            <div className="flex items-center text-sm text-gray-500">
+                              <span>Click on the link to view details</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Pagination Controls */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-between px-6 py-4 bg-white border-t border-gray-200 rounded-b-lg">
+                      <div className="flex items-center text-sm text-gray-700">
+                        <span>
+                          Showing {startIndex + 1} to {Math.min(endIndex, sortedNews.length)} of {sortedNews.length}{" "}
+                          results
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={goToPrevious}
+                          disabled={currentPage === 1}
+                          className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Previous
+                        </button>
+
+                        <div className="flex space-x-1">
+                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                            <button
+                              key={page}
+                              onClick={() => goToPage(page)}
+                              className={`px-3 py-2 text-sm font-medium rounded-md ${
+                                currentPage === page
+                                  ? "bg-yellow-600 text-white"
+                                  : "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+                              }`}
+                            >
+                              {page}
+                            </button>
+                          ))}
+                        </div>
+
+                        <button
+                          onClick={goToNext}
+                          disabled={currentPage === totalPages}
+                          className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Next
+                        </button>
                       </div>
                     </div>
-                    <h3 className="text-white text-lg sm:text-xl lg:text-2xl font-bold leading-tight">{item.title}</h3>
+                  )}
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center mb-4">
+                    <ExternalLinkIcon size={24} className="text-gray-400" />
                   </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No posts to display</h3>
+                  <p className="text-gray-500 text-center max-w-sm">
+                    There are currently no announcements or notices available. Please check back later.
+                  </p>
                 </div>
-                <div className="w-full sm:w-3/5 bg-white p-4 sm:p-6 lg:p-8 flex items-center">
-                  <div className="w-full">
-                    <div className="text-gray-900 text-base sm:text-lg font-semibold mb-2">{item.date}</div>
-                    <h4 className="text-gray-800 text-lg sm:text-xl font-medium leading-tight">{item.subtitle}</h4>
-                  </div>
-                </div>
-              </article>
-            ))}
+              )}
+            </div>
           </div>
         </div>
       </section>
