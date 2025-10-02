@@ -10,6 +10,7 @@ import { ResetPasswordDialog } from "./ResetPasswordDialog";
 import { pb } from "@/lib/db/pb";
 import { redirect } from "next/dist/server/api-utils";
 import { ChevronDown } from "lucide-react";
+import { DEFAULT_PASSWORD } from "@/lib/constants";
 
 export function RegisterForm() {
   const form = useForm({
@@ -27,8 +28,6 @@ export function RegisterForm() {
   const [showReset, setShowReset] = useState(false);
   const [pendingCreds, setPendingCreds] = useState<{ email: string; password: string } | null>(null);
   const [isSelectOpen, setIsSelectOpen] = useState(false);
-  // TODO: Replace this with your actual default password value
-  const DEFAULT_PASSWORD = "changeme";
 
   const handleSubmit = (data: { email: string; password: string; org: string }) => {
     const output = {
@@ -105,7 +104,11 @@ export function RegisterForm() {
                           </option>
                         ))}
                       </select>
-                      <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-sky-600 pointer-events-none transition-transform duration-200 ${isSelectOpen ? 'rotate-180' : ''}`} />
+                      <ChevronDown
+                        className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-sky-600 pointer-events-none transition-transform duration-200 ${
+                          isSelectOpen ? "rotate-180" : ""
+                        }`}
+                      />
                     </div>
                   </FormControl>
                   <FormMessage />

@@ -7,6 +7,14 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
+import {
+  NAV_ITEMS,
+  EVENT_TITLE,
+  EVENT_SHORT_NAME,
+  EVENT_YEAR,
+  ORGANIZING_DEPT,
+  ORGANIZING_GOVT,
+} from "@/lib/constants";
 
 export function Header() {
   const pathname = usePathname();
@@ -16,16 +24,6 @@ export function Header() {
   useEffect(() => {
     setLoggedIn(pb.authStore.isValid);
   }, []);
-
-  const navItems = [
-    { href: "/", label: "Home" },
-    { href: "/about", label: "About" },
-    { href: "/committee", label: "Committee" },
-    { href: "/events", label: "Events" },
-    { href: "/results", label: "Results" },
-    { href: "/gallery", label: "Gallery" },
-    { href: "/contact", label: "Contact Us" },
-  ];
 
   const isActive = (href: string) => {
     if (href === "/") {
@@ -60,22 +58,22 @@ export function Header() {
           {/* Center Text - Hidden on mobile */}
           <div className="hidden lg:block text-center flex-1 px-4 transform translate-x-10">
             <div className="text-black text-base xl:text-xl font-medium font-['Inter'] leading-relaxed tracking-tight">
-              28th All India Forest Sports Meet, 2025
+              {EVENT_TITLE}
               <br />
-              Uttarakhand Forest Department
+              {ORGANIZING_DEPT}
               <br />
-              Government of Uttarakhand
+              {ORGANIZING_GOVT}
             </div>
           </div>
 
           {/* Mobile Center Text - Visible only on mobile/tablet */}
           <div className="lg:hidden text-center flex-1 px-2 transform translate-x-10">
             <div className="text-black text-xs sm:text-sm md:text-base font-medium font-['Inter'] leading-snug">
-              28th All India Forest Sports Meet, 2025
+              {EVENT_TITLE}
               <br />
-              Uttarakhand Forest Department
+              {ORGANIZING_DEPT}
               <br />
-              Government of Uttarakhand
+              {ORGANIZING_GOVT}
             </div>
           </div>
 
@@ -85,7 +83,7 @@ export function Header() {
             <Image
               className="w-8 h-8 sm:w-14 sm:h-14 md:w-18 md:h-18 lg:w-20 lg:h-20 transform translate-x-5"
               src="/logos/van_vibhag.png"
-              alt="AIFSM Logo"
+              alt={`${EVENT_SHORT_NAME} Logo`}
               width={80}
               height={80}
             />
@@ -115,7 +113,7 @@ export function Header() {
         <div className="flex justify-between items-center">
           {/* Desktop Navigation */}
           <div className="hidden lg:flex flex-1 justify-start items-center gap-2 xl:gap-4 2xl:gap-8">
-            {navItems.map((item) => (
+            {NAV_ITEMS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -191,7 +189,7 @@ export function Header() {
         {mobileMenuOpen && (
           <div className="lg:hidden mt-4 pb-4 border-t border-zinc-200 pt-4 space-y-2">
             {/* Mobile Navigation Links */}
-            {navItems.map((item) => (
+            {NAV_ITEMS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -253,7 +251,7 @@ export function Header() {
 }
 
 export type HeaderImageProps = {
-  image: "default" | "about" | "contact" | "events" | "committee" | "gallery" | "results";
+  image: "default" | "about" | "contact" | "events" | "committee" | "gallery" | "results" | "schedule";
 };
 
 export function Header_Image({ image }: HeaderImageProps) {
@@ -277,6 +275,9 @@ export function Header_Image({ image }: HeaderImageProps) {
     case "results":
       img = "/ui/header_results.png";
       break;
+    case "schedule":
+      img = "/ui/header_schedule.png";
+      break;
     case "default":
     default:
       img = "/ui/header_image.png";
@@ -287,7 +288,7 @@ export function Header_Image({ image }: HeaderImageProps) {
     <div className="w-full h-[150px] sm:h-[200px] md:h-[250px] lg:h-[300px] relative">
       <Image
         src={img}
-        alt={`${image.charAt(0).toUpperCase() + image.slice(1)} AIFSM 2025`}
+        alt={`${image.charAt(0).toUpperCase() + image.slice(1)} ${EVENT_SHORT_NAME} ${EVENT_YEAR}`}
         fill
         className="object-cover"
         priority

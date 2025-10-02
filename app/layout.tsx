@@ -6,6 +6,7 @@ import { Header } from "@/components/common/header";
 import { Footer } from "@/components/common/footer";
 import { AuthProvider } from "@/lib/auth/authContext";
 import { Toaster } from "sonner";
+import { EVENT_TITLE, ORGANIZING_DEPT, ORGANIZING_GOVT, TARGET_DATE } from "@/lib/constants";
 
 const inter = Inter({
   variable: "--font-inter-sans",
@@ -116,6 +117,39 @@ export default function RootLayout({
       <body className={`${inter.variable} ${rampart.variable} ${urbanist.variable} antialiased`}>
         <Header />
         <AuthProvider>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "SportsEvent",
+                name: EVENT_TITLE,
+                startDate: TARGET_DATE.toISOString(),
+                location: {
+                  "@type": "Place",
+                  name: "Dehradun, Uttarakhand, India",
+                  address: {
+                    "@type": "PostalAddress",
+                    addressLocality: "Dehradun",
+                    addressRegion: "Uttarakhand",
+                    addressCountry: "India",
+                  },
+                },
+                organizer: {
+                  "@type": "Organization",
+                  name: ORGANIZING_DEPT,
+                  legalName: ORGANIZING_GOVT,
+                  url: "https://aifsm2025.in",
+                },
+                eventStatus: "https://schema.org/EventScheduled",
+                eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+                image: ["https://aifsm2025.in/logo.svg"],
+                description:
+                  "The 28th All India Forest Sports Meet 2025 organized by the Uttarakhand Forest Department.",
+                url: "https://aifsm2025.in",
+              }),
+            }}
+          />
           <main className="">{children}</main>
         </AuthProvider>
         <Footer />

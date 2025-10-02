@@ -15,7 +15,7 @@ const tShirtSizes = {
   L: "L",
   XL: "XL",
   XXL: "XXL",
-  XXXL: "XXXL"
+  XXXL: "XXXL",
 };
 
 import {
@@ -27,7 +27,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import { updatePlayer, getPlayer, db } from "@/lib/db/pb";
+import { updatePlayer, getPlayer } from "@/lib/db/pb";
+import { DATABASE_URL, LOCAL_DATABASE_URL } from "@/lib/constants";
 import { deletePlayer } from "@/lib/db/pb";
 import { toast } from "sonner";
 import { TravelPlanDialog } from "./travelPlanDialog";
@@ -36,12 +37,16 @@ export function PlayerCard({
   player,
   index,
   onUpdate,
-  onDelete
+  onDelete,
+  isAdmin = false,
+  showRegisteredBy = false,
 }: {
   player: Player;
   index: number;
   onUpdate?: (updatedPlayer: Player) => void;
   onDelete?: (playerId: string) => void;
+  isAdmin?: boolean;
+  showRegisteredBy?: boolean;
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [travelPlanDialogOpen, setTravelPlanDialogOpen] = useState(false);
@@ -56,13 +61,13 @@ export function PlayerCard({
   // Validate Aadhar number
   const validateAadhar = (aadharNumber: string): string => {
     // Remove any spaces or special characters
-    const cleanAadhar = aadharNumber.replace(/\D/g, '');
+    const cleanAadhar = aadharNumber.replace(/\D/g, "");
 
     if (cleanAadhar.length !== 12) {
       return "Aadhar number must be exactly 12 digits";
     }
 
-    if (cleanAadhar.startsWith('0') || cleanAadhar.startsWith('1')) {
+    if (cleanAadhar.startsWith("0") || cleanAadhar.startsWith("1")) {
       return "Aadhar number cannot start with 0 or 1";
     }
 
@@ -109,7 +114,7 @@ export function PlayerCard({
 
     if (name === "aadhar") {
       // Only allow digits and limit to 12 characters
-      const cleanValue = value.replace(/\D/g, '').slice(0, 12);
+      const cleanValue = value.replace(/\D/g, "").slice(0, 12);
       setFormData((prev) => ({ ...prev, [name]: cleanValue }));
 
       // Validate Aadhar if it's 12 digits
@@ -222,12 +227,36 @@ export function PlayerCard({
   return (
     <div className="bg-white rounded-lg shadow-lg p-4 flex flex-col justify-between h-full">
       <div>
+        {/* Admin badge */}
+        {isAdmin && (
+          <div className="flex justify-between items-center mb-2">
+            <span className="bg-red-100 text-red-800 text-xs font-semibold px-2 py-1 rounded-full">ADMIN VIEW</span>
+            {showRegisteredBy && (player as any).expand?.RegisteredBy && (
+              <span className="text-xs text-gray-500">Registered by: {(player as any).expand.RegisteredBy.email}</span>
+            )}
+          </div>
+        )}
+
         <h2 className="text-xl font-bold text-sky-900 mb-2">
           {index}. {player.name}
         </h2>
         <p className="text-gray-600 mb-1">
           <span className="font-semibold">Event:</span> {player.event}
         </p>
+        {isAdmin && (
+          <div className="text-sm text-gray-500 mt-2 space-y-1">
+            <p>
+              <span className="font-semibold">Organization:</span> {player.organisation}
+            </p>
+            <p>
+              <span className="font-semibold">Aadhar:</span> ****
+              {player.aadhar && typeof player.aadhar === "string" ? player.aadhar.slice(-4) : "N/A"}
+            </p>
+            <p>
+              <span className="font-semibold">Mobile:</span> {player.mobile}
+            </p>
+          </div>
+        )}
       </div>
       <div className="flex justify-between mt-4 gap-2">
         <Button
@@ -256,10 +285,11 @@ export function PlayerCard({
                   type="button"
                   variant={viewMode ? "outline" : "default"}
                   size="default"
-                  className={`px-4 py-2 mr-15 -mt-[1.7rem] cursor-pointer rounded-lg font-medium transition-all duration-200 ${viewMode
-                    ? "border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400"
-                    : "bg-blue-600 text-white hover:bg-blue-700"
-                    }`}
+                  className={`px-4 py-2 mr-15 -mt-[1.7rem] cursor-pointer rounded-lg font-medium transition-all duration-200 ${
+                    viewMode
+                      ? "border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400"
+                      : "bg-blue-600 text-white hover:bg-blue-700"
+                  }`}
                   onClick={toggleEditMode}
                 >
                   <Edit className="h-4 w-4 mr-2" />
@@ -275,8 +305,9 @@ export function PlayerCard({
               <div className="flex flex-col w-full space-y-2">
                 <label className="font-semibold text-gray-700">Organization</label>
                 <input
-                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${viewMode ? "cursor-default" : "cursor-pointer"
-                    }`}
+                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${
+                    viewMode ? "cursor-default" : "cursor-pointer"
+                  }`}
                   value={formData.organisation}
                   name="organisation"
                   readOnly={viewMode}
@@ -286,8 +317,9 @@ export function PlayerCard({
               <div className="flex flex-col w-full space-y-2">
                 <label className="font-semibold text-gray-700">Enter Name</label>
                 <input
-                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${viewMode ? "cursor-default" : "cursor-pointer"
-                    }`}
+                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${
+                    viewMode ? "cursor-default" : "cursor-pointer"
+                  }`}
                   value={formData.name}
                   name="name"
                   onChange={handleChange}
@@ -297,8 +329,9 @@ export function PlayerCard({
               <div className="flex flex-col w-full space-y-2">
                 <label className="font-semibold text-gray-700">Enter Age</label>
                 <input
-                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${viewMode ? "cursor-default" : "cursor-pointer"
-                    }`}
+                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${
+                    viewMode ? "cursor-default" : "cursor-pointer"
+                  }`}
                   type="number"
                   value={formData.age}
                   name="age"
@@ -309,8 +342,9 @@ export function PlayerCard({
               <div className="flex flex-col w-full space-y-2">
                 <label className="font-semibold text-gray-700">Select Blood Group</label>
                 <select
-                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${viewMode ? "cursor-default" : "cursor-pointer"
-                    }`}
+                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${
+                    viewMode ? "cursor-default" : "cursor-pointer"
+                  }`}
                   value={formData.bloodGroup}
                   name="bloodGroup"
                   onChange={handleChange}
@@ -327,8 +361,9 @@ export function PlayerCard({
               <div className="flex flex-col w-full space-y-2">
                 <label className="font-semibold text-gray-700">Select T-Shirt Size</label>
                 <select
-                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${viewMode ? "cursor-default" : "cursor-pointer"
-                    }`}
+                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${
+                    viewMode ? "cursor-default" : "cursor-pointer"
+                  }`}
                   value={formData.tShirtSize || ""}
                   name="tShirtSize"
                   onChange={handleChange}
@@ -345,8 +380,9 @@ export function PlayerCard({
               <div className="flex flex-col w-full space-y-2">
                 <label className="font-semibold text-gray-700">Enter Mobile Number</label>
                 <input
-                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${viewMode ? "cursor-default" : "cursor-pointer"
-                    }`}
+                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${
+                    viewMode ? "cursor-default" : "cursor-pointer"
+                  }`}
                   value={formData.mobile}
                   name="mobile"
                   onChange={handleChange}
@@ -356,8 +392,9 @@ export function PlayerCard({
               <div className="flex flex-col w-full space-y-2">
                 <label className="font-semibold text-gray-700">Enter Aadhar Card</label>
                 <input
-                  className={`bg-gray-50 rounded-md px-4 py-3 border ${aadharError && !viewMode ? 'border-red-500' : 'border-gray-300'
-                    } ${viewMode ? "cursor-default" : "cursor-pointer"}`}
+                  className={`bg-gray-50 rounded-md px-4 py-3 border ${
+                    aadharError && !viewMode ? "border-red-500" : "border-gray-300"
+                  } ${viewMode ? "cursor-default" : "cursor-pointer"}`}
                   value={formData.aadhar}
                   name="aadhar"
                   onChange={handleChange}
@@ -366,15 +403,14 @@ export function PlayerCard({
                   placeholder="Enter 12-digit Aadhar number"
                   maxLength={12}
                 />
-                {aadharError && !viewMode && (
-                  <span className="text-red-500 text-sm">{aadharError}</span>
-                )}
+                {aadharError && !viewMode && <span className="text-red-500 text-sm">{aadharError}</span>}
               </div>
               <div className="flex flex-col w-full space-y-2">
                 <label className="font-semibold text-gray-700">Enter Employee ID</label>
                 <input
-                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${viewMode ? "cursor-default" : "cursor-pointer"
-                    }`}
+                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${
+                    viewMode ? "cursor-default" : "cursor-pointer"
+                  }`}
                   value={formData.employeeId}
                   name="employeeId"
                   onChange={handleChange}
@@ -388,8 +424,9 @@ export function PlayerCard({
                   <div className="flex flex-col space-y-1">
                     <label className="text-sm font-medium text-gray-600">Sport Category</label>
                     <select
-                      className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${viewMode ? "cursor-default" : "cursor-pointer"
-                        }`}
+                      className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${
+                        viewMode ? "cursor-default" : "cursor-pointer"
+                      }`}
                       value={selectedSport}
                       onChange={(e) => handleSportChange(e.target.value)}
                       disabled={viewMode}
@@ -406,8 +443,9 @@ export function PlayerCard({
                   <div className="flex flex-col space-y-1">
                     <label className="text-sm font-medium text-gray-600">Event Type</label>
                     <select
-                      className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${viewMode ? "cursor-default" : "cursor-pointer"
-                        }`}
+                      className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${
+                        viewMode ? "cursor-default" : "cursor-pointer"
+                      }`}
                       value={selectedSubCategory}
                       onChange={(e) => handleSubCategoryChange(e.target.value)}
                       disabled={!selectedSport || viewMode}
@@ -425,8 +463,9 @@ export function PlayerCard({
                   <div className="flex flex-col space-y-1">
                     <label className="text-sm font-medium text-gray-600">Sub Category</label>
                     <select
-                      className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${viewMode ? "cursor-default" : "cursor-pointer"
-                        }`}
+                      className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${
+                        viewMode ? "cursor-default" : "cursor-pointer"
+                      }`}
                       value={selectedGender}
                       onChange={(e) => setSelectedGender(e.target.value)}
                       disabled={!selectedSubCategory || viewMode}
@@ -457,8 +496,9 @@ export function PlayerCard({
               <div className="flex flex-col w-full space-y-2">
                 <label className="font-semibold text-gray-700">Any Health Issues</label>
                 <input
-                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${viewMode ? "cursor-default" : "cursor-pointer"
-                    }`}
+                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${
+                    viewMode ? "cursor-default" : "cursor-pointer"
+                  }`}
                   value={formData.healthIssues || ""}
                   name="healthIssues"
                   onChange={handleChange}
@@ -468,8 +508,9 @@ export function PlayerCard({
               <div className="flex flex-col w-full space-y-2">
                 <label className="font-semibold text-gray-700">Meal Preference</label>
                 <select
-                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${viewMode ? "cursor-default" : "cursor-pointer"
-                    }`}
+                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${
+                    viewMode ? "cursor-default" : "cursor-pointer"
+                  }`}
                   value={formData.mealType}
                   name="mealType"
                   onChange={handleChange}
@@ -492,8 +533,9 @@ export function PlayerCard({
                       <Image
                         src={
                           typeof formData.profilePicture === "string"
-                            ? `${process.env.DATABASE_URL || db}/api/files/players/${formData.id
-                            }/${formData.profilePicture}`
+                            ? `${process.env.DATABASE_URL || DATABASE_URL}/api/files/players/${formData.id}/${
+                                formData.profilePicture
+                              }`
                             : URL.createObjectURL(formData.profilePicture)
                         }
                         alt="Profile Preview"
@@ -517,8 +559,8 @@ export function PlayerCard({
                       {formData.profilePicture && (
                         <span className="text-blue-600 underline text-sm mb-2">
                           {formData.profilePicture &&
-                            typeof formData.profilePicture === "object" &&
-                            "name" in formData.profilePicture
+                          typeof formData.profilePicture === "object" &&
+                          "name" in formData.profilePicture
                             ? formData.profilePicture.name
                             : "View"}{" "}
                           (preview)
@@ -536,8 +578,9 @@ export function PlayerCard({
                       <Image
                         src={
                           typeof formData.employeeIDCard === "string"
-                            ? `${process.env.DATABASE_URL || db}/api/files/players/${formData.id
-                            }/${formData.employeeIDCard}`
+                            ? `${process.env.DATABASE_URL || DATABASE_URL}/api/files/players/${formData.id}/${
+                                formData.employeeIDCard
+                              }`
                             : URL.createObjectURL(formData.employeeIDCard)
                         }
                         alt="Employee ID Preview"
@@ -561,8 +604,8 @@ export function PlayerCard({
                       {formData.employeeIDCard && (
                         <span className="text-blue-600 underline text-sm mb-2">
                           {formData.employeeIDCard &&
-                            typeof formData.employeeIDCard === "object" &&
-                            "name" in formData.employeeIDCard
+                          typeof formData.employeeIDCard === "object" &&
+                          "name" in formData.employeeIDCard
                             ? formData.employeeIDCard.name
                             : "View"}{" "}
                           (preview)

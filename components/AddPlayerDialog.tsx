@@ -2,11 +2,12 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { createPlayer } from "@/lib/db/pb";
+import { createPlayer, getPlayersByAadhar, getRegistrationStatus } from "@/lib/db/pb";
 import { sportsData, bloodGroups } from "@/lib/types";
 import type { Player } from "@/lib/types";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth/authContext";
+import { REGISTRATION_OPEN, REGISTRATION_LIMITS, TEAM_EVENT_KEYWORDS } from "@/lib/constants";
 
 const tShirtSizes = {
   XS: "XS",
@@ -15,7 +16,7 @@ const tShirtSizes = {
   L: "L",
   XL: "XL",
   XXL: "XXL",
-  XXXL: "XXXL"
+  XXXL: "XXXL",
 };
 
 const initialPlayerState: Omit<Player, "id"> = {
@@ -36,7 +37,7 @@ const initialPlayerState: Omit<Player, "id"> = {
 
 export function AddPlayerDialog({
   userId,
-  onPlayerAdded
+  onPlayerAdded,
 }: {
   userId: string;
   onPlayerAdded?: (newPlayer: Player) => void;
@@ -49,17 +50,25 @@ export function AddPlayerDialog({
   const [selectedGender, setSelectedGender] = useState("");
   const [loading, setLoading] = useState(false);
   const [aadharError, setAadharError] = useState("");
+  const [registrationStatus, setRegistrationStatus] = useState<{
+    soloEvents: number;
+    teamEvents: number;
+    events: string[];
+  } | null>(null);
+  const [checkingRegistrations, setCheckingRegistrations] = useState(false);
+  const [registrationOpen, setRegistrationOpen] = useState(true);
+  const [checkingRegistrationStatus, setCheckingRegistrationStatus] = useState(false);
 
   // Validate Aadhar number
   const validateAadhar = (aadharNumber: string): string => {
     // Remove any spaces or special characters
-    const cleanAadhar = aadharNumber.replace(/\D/g, '');
+    const cleanAadhar = aadharNumber.replace(/\D/g, "");
 
     if (cleanAadhar.length !== 12) {
       return "Aadhar number must be exactly 12 digits";
     }
 
-    if (cleanAadhar.startsWith('0') || cleanAadhar.startsWith('1')) {
+    if (cleanAadhar.startsWith("0") || cleanAadhar.startsWith("1")) {
       return "Aadhar number cannot start with 0 or 1";
     }
 
@@ -70,14 +79,140 @@ export function AddPlayerDialog({
     return "";
   };
 
+  const checkCurrentRegistrations = async (aadharNumber: string) => {
+    if (aadharNumber.length !== 12) {
+      setRegistrationStatus(null);
+      return;
+    }
+
+    setCheckingRegistrations(true);
+    try {
+      const existingPlayers = await getPlayersByAadhar(aadharNumber);
+
+      const isTeamEvent = (event: string): boolean => {
+        return TEAM_EVENT_KEYWORDS.some((keyword) => event.toLowerCase().includes(keyword.toLowerCase()));
+      };
+
+      let soloEvents = 0;
+      let teamEvents = 0;
+      const events: string[] = [];
+
+      existingPlayers.forEach((player) => {
+        events.push(player.event);
+        if (isTeamEvent(player.event)) {
+          teamEvents++;
+        } else {
+          soloEvents++;
+        }
+      });
+
+      setRegistrationStatus({
+        soloEvents,
+        teamEvents,
+        events,
+      });
+    } catch (error) {
+      console.error("Error checking registrations:", error);
+      setRegistrationStatus(null);
+    } finally {
+      setCheckingRegistrations(false);
+    }
+  };
+
+  const validateRegistrationRegulations = async (
+    aadharNumber: string,
+    newEvent: string,
+  ): Promise<{ isValid: boolean; message?: string }> => {
+    try {
+      // Get all existing registrations for this Aadhar number
+      const existingPlayers = await getPlayersByAadhar(aadharNumber);
+
+      if (existingPlayers.length === 0) {
+        return { isValid: true }; // First registration for this player
+      }
+
+      // Define team events using centralized keywords
+      const isTeamEvent = (event: string): boolean => {
+        return TEAM_EVENT_KEYWORDS.some((keyword) => event.toLowerCase().includes(keyword.toLowerCase()));
+      };
+
+      // Count current registrations
+      let soloEventsCount = 0;
+      let teamEventsCount = 0;
+
+      existingPlayers.forEach((player) => {
+        if (isTeamEvent(player.event)) {
+          teamEventsCount++;
+        } else {
+          soloEventsCount++;
+        }
+      });
+
+      // Check if the new event would exceed limits
+      if (isTeamEvent(newEvent)) {
+        if (teamEventsCount >= REGISTRATION_LIMITS.MAX_TEAM_EVENTS) {
+          return {
+            isValid: false,
+            message: `Player has already registered for maximum team events (${REGISTRATION_LIMITS.MAX_TEAM_EVENTS}). Current team events: ${teamEventsCount}`,
+          };
+        }
+      } else {
+        if (soloEventsCount >= REGISTRATION_LIMITS.MAX_SOLO_EVENTS) {
+          return {
+            isValid: false,
+            message: `Player has already registered for maximum solo events (${REGISTRATION_LIMITS.MAX_SOLO_EVENTS}). Current solo events: ${soloEventsCount}`,
+          };
+        }
+      }
+
+      // Check for duplicate event registration
+      const isDuplicateEvent = existingPlayers.some((player) => player.event === newEvent);
+      if (isDuplicateEvent) {
+        return {
+          isValid: false,
+          message: `Player is already registered for this event: ${newEvent}`,
+        };
+      }
+
+      return { isValid: true };
+    } catch (error) {
+      console.error("Error validating registration regulations:", error);
+      return {
+        isValid: false,
+        message: "Unable to validate registration. Please try again.",
+      };
+    }
+  };
+
   // Pre-fill organisation when user data is available
   useEffect(() => {
     if (user?.org) {
-      setFormData(prev => ({ ...prev, organisation: user.org }));
+      setFormData((prev) => ({ ...prev, organisation: user.org }));
     }
 
     // console.log("User data in AddPlayerDialog:", user);
   }, [user]);
+
+  // Check registration status when dialog opens
+  useEffect(() => {
+    if (dialogOpen) {
+      checkRegistrationStatus();
+    }
+  }, [dialogOpen]);
+
+  const checkRegistrationStatus = async () => {
+    setCheckingRegistrationStatus(true);
+    try {
+      const status = await getRegistrationStatus();
+      setRegistrationOpen(status);
+    } catch (error) {
+      console.error("Failed to check registration status:", error);
+      // Default to open on error
+      setRegistrationOpen(true);
+    } finally {
+      setCheckingRegistrationStatus(false);
+    }
+  };
 
   const handleSportChange = (sport: string) => {
     setSelectedSport(sport);
@@ -96,20 +231,25 @@ export function AddPlayerDialog({
     if (!selectedSport || !selectedSubCategory || !sportsData[selectedSport]?.[selectedSubCategory]) return [];
     return sportsData[selectedSport][selectedSubCategory];
   };
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
     if (name === "aadhar") {
       // Only allow digits and limit to 12 characters
-      const cleanValue = value.replace(/\D/g, '').slice(0, 12);
+      const cleanValue = value.replace(/\D/g, "").slice(0, 12);
       setFormData((prev) => ({ ...prev, [name]: cleanValue }));
 
       // Validate Aadhar if it's 12 digits
       if (cleanValue.length === 12) {
         const error = validateAadhar(cleanValue);
         setAadharError(error);
+        if (!error) {
+          // Check current registrations for this Aadhar
+          await checkCurrentRegistrations(cleanValue);
+        }
       } else {
         setAadharError(cleanValue.length > 0 ? "Aadhar number must be 12 digits" : "");
+        setRegistrationStatus(null);
       }
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
@@ -133,6 +273,12 @@ export function AddPlayerDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Check if registration is closed
+    if (!registrationOpen) {
+      toast.error("Registration is currently closed.");
+      return;
+    }
+
     // Validate Aadhar before submission
     if (formData.aadhar) {
       const aadharValidationError = validateAadhar(formData.aadhar);
@@ -141,6 +287,19 @@ export function AddPlayerDialog({
         toast.error("Please enter a valid Aadhar number");
         return;
       }
+    }
+
+    // Validate event selection
+    if (!formData.event) {
+      toast.error("Please select an event");
+      return;
+    }
+
+    // Validate registration regulations
+    const regulationCheck = await validateRegistrationRegulations(formData.aadhar, formData.event);
+    if (!regulationCheck.isValid) {
+      toast.error(regulationCheck.message || "Registration validation failed");
+      return;
     }
 
     setLoading(true);
@@ -167,6 +326,7 @@ export function AddPlayerDialog({
     <div className="flex flex-col items-center">
       <Button
         className="bg-blue-500 text-white px-6 py-2 rounded-lg cursor-pointer"
+        disabled={!REGISTRATION_OPEN}
         onClick={() => {
           setDialogOpen(true);
           setAadharError(""); // Clear any previous validation errors
@@ -179,6 +339,15 @@ export function AddPlayerDialog({
           <DialogHeader className="pb-6">
             <DialogTitle className="text-2xl font-bold">Register New Player</DialogTitle>
             <DialogDescription className="text-lg">Enter all details for the new player</DialogDescription>
+
+            {/* Registration status message */}
+            {checkingRegistrationStatus && <div className="text-blue-600 text-sm">Checking registration status...</div>}
+            {!checkingRegistrationStatus && !registrationOpen && (
+              <div className="bg-red-50 border border-red-200 rounded-md p-3 mt-2">
+                <p className="text-red-700 font-medium">Registration is currently closed</p>
+                <p className="text-red-600 text-sm">Please contact the administrators for more information.</p>
+              </div>
+            )}
           </DialogHeader>
           <form
             className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 text-base text-gray-800"
@@ -268,8 +437,9 @@ export function AddPlayerDialog({
             <div className="flex flex-col w-full space-y-2">
               <label className="font-semibold text-gray-700">Enter Aadhar Card</label>
               <input
-                className={`bg-gray-50 rounded-md px-4 py-3 border ${aadharError ? 'border-red-500' : 'border-gray-300'
-                  } cursor-pointer`}
+                className={`bg-gray-50 rounded-md px-4 py-3 border ${
+                  aadharError ? "border-red-500" : "border-gray-300"
+                } cursor-pointer`}
                 value={formData.aadhar}
                 name="aadhar"
                 onChange={handleChange}
@@ -278,8 +448,57 @@ export function AddPlayerDialog({
                 maxLength={12}
                 required
               />
-              {aadharError && (
-                <span className="text-red-500 text-sm">{aadharError}</span>
+              {aadharError && <span className="text-red-500 text-sm">{aadharError}</span>}
+
+              {/* Registration Status Display */}
+              {checkingRegistrations && (
+                <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                  <p className="text-sm text-blue-600">Checking current registrations...</p>
+                </div>
+              )}
+
+              {registrationStatus && (
+                <div className="mt-2 p-4 bg-gray-50 border border-gray-300 rounded-md">
+                  <h4 className="font-semibold text-gray-700 mb-2">Current Registrations:</h4>
+                  <div className="grid grid-cols-2 gap-4 mb-3">
+                    <div className="text-sm">
+                      <span className="font-medium">Solo Events: </span>
+                      <span
+                        className={`${
+                          registrationStatus.soloEvents >= REGISTRATION_LIMITS.MAX_SOLO_EVENTS
+                            ? "text-red-600 font-bold"
+                            : "text-green-600"
+                        }`}
+                      >
+                        {registrationStatus.soloEvents}/{REGISTRATION_LIMITS.MAX_SOLO_EVENTS}
+                      </span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="font-medium">Team Events: </span>
+                      <span
+                        className={`${
+                          registrationStatus.teamEvents >= REGISTRATION_LIMITS.MAX_TEAM_EVENTS
+                            ? "text-red-600 font-bold"
+                            : "text-green-600"
+                        }`}
+                      >
+                        {registrationStatus.teamEvents}/{REGISTRATION_LIMITS.MAX_TEAM_EVENTS}
+                      </span>
+                    </div>
+                  </div>
+                  {registrationStatus.events.length > 0 && (
+                    <div className="text-sm">
+                      <span className="font-medium text-gray-700">Registered Events:</span>
+                      <ul className="mt-1 pl-4 space-y-1">
+                        {registrationStatus.events.map((event, index) => (
+                          <li key={index} className="text-gray-600 text-xs">
+                            • {event}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
             <div className="flex flex-col w-full space-y-2">
@@ -400,8 +619,8 @@ export function AddPlayerDialog({
                 {formData.profilePicture && (
                   <span className="text-blue-600 underline text-sm mb-2">
                     {formData.profilePicture &&
-                      typeof formData.profilePicture === "object" &&
-                      "name" in formData.profilePicture
+                    typeof formData.profilePicture === "object" &&
+                    "name" in formData.profilePicture
                       ? formData.profilePicture.name
                       : "View"}{" "}
                     (preview)
@@ -421,8 +640,8 @@ export function AddPlayerDialog({
                 {formData.employeeIDCard && (
                   <span className="text-blue-600 underline text-sm mb-2">
                     {formData.employeeIDCard &&
-                      typeof formData.employeeIDCard === "object" &&
-                      "name" in formData.employeeIDCard
+                    typeof formData.employeeIDCard === "object" &&
+                    "name" in formData.employeeIDCard
                       ? formData.employeeIDCard.name
                       : "View"}{" "}
                     (preview)
@@ -435,10 +654,16 @@ export function AddPlayerDialog({
             <div className="col-span-1 md:col-span-2 flex justify-center mt-8 pt-6 border-t border-gray-200">
               <Button
                 type="submit"
-                className="bg-sky-600 hover:bg-sky-700 text-white px-12 py-3 rounded-lg text-lg font-semibold transition-colors shadow-lg cursor-pointer"
-                disabled={loading}
+                className="bg-sky-600 hover:bg-sky-700 text-white px-12 py-3 rounded-lg text-lg font-semibold transition-colors shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={loading || !registrationOpen || checkingRegistrationStatus}
               >
-                {loading ? "Registering..." : "Register Player"}
+                {loading
+                  ? "Registering..."
+                  : checkingRegistrationStatus
+                  ? "Checking..."
+                  : !registrationOpen
+                  ? "Registration Closed"
+                  : "Register Player"}
               </Button>
             </div>
           </form>

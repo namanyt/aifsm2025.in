@@ -12,14 +12,13 @@ import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { ResetPasswordDialog } from "./ResetPasswordDialog";
 import { ForgotPasswordDialog } from "./ForgotPasswordDialog";
+import { DEFAULT_PASSWORD } from "@/lib/constants";
 
 export function LoginForm() {
   let [isSelectOpen, setIsSelectOpen] = useState(false);
   const [showReset, setShowReset] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [pendingCreds, setPendingCreds] = useState<{ email: string; password: string } | null>(null);
-  // TODO: Replace this with your actual default password value
-  const DEFAULT_PASSWORD = "changeme";
 
   const form = useForm({
     defaultValues: {

@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-
-const TARGET_DATE = new Date("2025-11-12T00:00:00+05:30");
+import { TARGET_DATE } from "@/lib/constants";
 
 function getTimeLeft() {
   const now = new Date();

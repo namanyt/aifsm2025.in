@@ -5,22 +5,17 @@ import { Button } from "./ui/button";
 import { useState } from "react";
 import { Edit, Upload, FileText, Image as ImageIcon, Trash2 } from "lucide-react";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 import { updatePlayer } from "@/lib/db/pb";
+import { LOCAL_DATABASE_URL } from "@/lib/constants";
 import { toast } from "sonner";
 
 export function TravelPlanDialog({
   player,
   isOpen,
   onClose,
-  onUpdate
+  onUpdate,
 }: {
   player: Player;
   isOpen: boolean;
@@ -131,17 +126,17 @@ export function TravelPlanDialog({
   // Get file icon based on type
   const getFileIcon = (fileType?: string) => {
     if (!fileType) return <FileText className="h-8 w-8 text-gray-400" />;
-    if (fileType.startsWith('image/')) return <ImageIcon className="h-8 w-8 text-blue-500" />;
-    if (fileType === 'application/pdf') return <FileText className="h-8 w-8 text-red-500" />;
+    if (fileType.startsWith("image/")) return <ImageIcon className="h-8 w-8 text-blue-500" />;
+    if (fileType === "application/pdf") return <FileText className="h-8 w-8 text-red-500" />;
     return <FileText className="h-8 w-8 text-gray-400" />;
   };
 
   // Get file preview URL
   const getFilePreviewUrl = () => {
     if (!formData.travelPlan) return null;
-    if (typeof formData.travelPlan === 'string') {
+    if (typeof formData.travelPlan === "string") {
       // If it's a string (existing file), construct the API URL
-      return `${process.env.DATABASE_URL || 'http://localhost:8090'}/api/files/players/${player.id}/${formData.travelPlan}`;
+      return `${process.env.DATABASE_URL || LOCAL_DATABASE_URL}/api/files/players/${player.id}/${formData.travelPlan}`;
     } else {
       // If it's a File object (new upload), create object URL
       return URL.createObjectURL(formData.travelPlan);
@@ -155,9 +150,7 @@ export function TravelPlanDialog({
           <div className="flex items-center justify-between">
             <div>
               <DialogTitle className="text-2xl font-bold">Travel Plan</DialogTitle>
-              <DialogDescription className="text-lg">
-                Travel plan for {player.name}
-              </DialogDescription>
+              <DialogDescription className="text-lg">Travel plan for {player.name}</DialogDescription>
             </div>
 
             {/* Edit Toggle Button */}
@@ -165,10 +158,11 @@ export function TravelPlanDialog({
               type="button"
               variant={viewMode ? "outline" : "default"}
               size="default"
-              className={`px-4 py-2 mr-15 -mt-[1.7rem] cursor-pointer rounded-lg font-medium transition-all duration-200 ${viewMode
-                ? "border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400"
-                : "bg-blue-600 text-white hover:bg-blue-700"
-                }`}
+              className={`px-4 py-2 mr-15 -mt-[1.7rem] cursor-pointer rounded-lg font-medium transition-all duration-200 ${
+                viewMode
+                  ? "border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+              }`}
               onClick={toggleEditMode}
             >
               <Edit className="h-4 w-4 mr-2" />
@@ -203,9 +197,7 @@ export function TravelPlanDialog({
 
             {viewMode ? (
               <div className="bg-gray-50 p-4 rounded-lg border">
-                <p className="text-gray-600">
-                  {formData.modeOfTravel || "No mode of travel specified"}
-                </p>
+                <p className="text-gray-600">{formData.modeOfTravel || "No mode of travel specified"}</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -218,7 +210,7 @@ export function TravelPlanDialog({
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="e.g., Flight, Train, Bus, Car, etc."
                   value={formData.modeOfTravel || ""}
-                  onChange={(e) => setFormData(prev => ({ ...prev, modeOfTravel: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, modeOfTravel: e.target.value }))}
                 />
               </div>
             )}
@@ -238,7 +230,7 @@ export function TravelPlanDialog({
                       <div className="text-center">
                         <p className="font-medium text-gray-700">{formData.travelPlanName}</p>
                         <p className="text-sm text-gray-500">
-                          {formData.travelPlanType?.includes('pdf') ? 'PDF Document' : 'Image File'}
+                          {formData.travelPlanType?.includes("pdf") ? "PDF Document" : "Image File"}
                         </p>
                         {formData.lastUpdated && (
                           <p className="text-xs text-gray-400">
@@ -249,10 +241,10 @@ export function TravelPlanDialog({
                     </div>
 
                     {/* Preview for images */}
-                    {formData.travelPlanType?.startsWith('image/') && (
+                    {formData.travelPlanType?.startsWith("image/") && (
                       <div className="mt-4">
                         <img
-                          src={getFilePreviewUrl() || ''}
+                          src={getFilePreviewUrl() || ""}
                           alt="Travel Plan Preview"
                           className="max-w-full max-h-64 object-contain rounded border"
                         />
@@ -266,10 +258,10 @@ export function TravelPlanDialog({
                         variant="outline"
                         onClick={() => {
                           const url = getFilePreviewUrl();
-                          if (url) window.open(url, '_blank');
+                          if (url) window.open(url, "_blank");
                         }}
                       >
-                        {formData.travelPlanType?.includes('pdf') ? 'View PDF' : 'View Full Size'}
+                        {formData.travelPlanType?.includes("pdf") ? "View PDF" : "View Full Size"}
                       </Button>
                     </div>
                   </div>
@@ -309,7 +301,7 @@ export function TravelPlanDialog({
                           <div>
                             <p className="font-medium text-blue-800">{formData.travelPlanName}</p>
                             <p className="text-sm text-blue-600">
-                              {formData.travelPlanType?.includes('pdf') ? 'PDF Document' : 'Image File'}
+                              {formData.travelPlanType?.includes("pdf") ? "PDF Document" : "Image File"}
                             </p>
                           </div>
                         </div>
@@ -360,11 +352,7 @@ export function TravelPlanDialog({
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                className="bg-sky-600 hover:bg-sky-700 text-white px-6 py-2"
-                disabled={loading}
-              >
+              <Button type="submit" className="bg-sky-600 hover:bg-sky-700 text-white px-6 py-2" disabled={loading}>
                 {loading ? "Saving..." : "Save Travel Plan"}
               </Button>
             </div>

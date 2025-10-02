@@ -1,9 +1,10 @@
 import { DashboardClient } from "@/components/DashboardClient";
-import { pb } from "@/lib/db/pb";
+import { pb, getPlayersForUser } from "@/lib/db/pb";
 import { Player } from "@/lib/types";
 import { redirect } from "next/navigation";
 import { getServerAuth } from "@/lib/auth/server";
 import { Metadata } from "next";
+import { isAdminUser } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -20,16 +21,12 @@ export default async function Dashboard() {
   }
 
   const user = auth.user;
+  const userIsAdmin = isAdminUser(user?.email);
 
-  const players = await pb.collection("players").getFullList<Player>(200, {
-    filter: `RegisteredBy="${user?.id}"`,
-    sort: "-created",
-  });
+  // Get players based on admin status
+  const players = await getPlayersForUser(user?.id ?? "", userIsAdmin);
 
   return (
-    <DashboardClient
-      initialPlayers={players}
-      userId={user?.id ?? ""}
-    />
+    <DashboardClient initialPlayers={players} userId={user?.id ?? ""} isAdmin={userIsAdmin} userEmail={user?.email} />
   );
 }

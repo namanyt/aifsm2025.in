@@ -2,6 +2,7 @@
 
 import { pb } from "@/lib/db/pb";
 import { createContext, useState, useEffect, use, useContext } from "react";
+import { API_ENDPOINTS } from "@/lib/constants";
 
 type User = typeof pb.authStore.record | null;
 
@@ -23,7 +24,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Send cookie to server so SSR pages can read it
       try {
-        const response = await fetch("/api/session", {
+        const response = await fetch(API_ENDPOINTS.SESSION, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ cookie: cookieStr }),
@@ -54,7 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Send cookie to server so SSR pages can read it
       // console.log("🔄 Sending cookie to session API...");
-      const response = await fetch("/api/session", {
+      const response = await fetch(API_ENDPOINTS.SESSION, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cookie: cookieStr }),
@@ -80,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Clear the session cookie on the server
     try {
-      const response = await fetch("/api/session", {
+      const response = await fetch(API_ENDPOINTS.SESSION, {
         method: "DELETE",
       });
 
