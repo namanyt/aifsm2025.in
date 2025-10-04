@@ -37,6 +37,7 @@ const initialPlayerState: Omit<Player, "id"> = {
   events: [],
   healthIssues: "",
   mealType: "Veg",
+  dateOfJoiningService: new Date(),
   profilePicture: undefined as any,
   employeeIDCard: undefined as any,
 };
@@ -87,6 +88,16 @@ export function AddPlayerDialog({
         ...prev,
         dateOfBirth: date,
         age: age,
+      }));
+    }
+  };
+
+  // Handle date of joining service change
+  const handleDateOfJoiningServiceChange = (date: Date | undefined) => {
+    if (date) {
+      setFormData((prev) => ({
+        ...prev,
+        dateOfJoiningService: date,
       }));
     }
   };
@@ -500,6 +511,35 @@ export function AddPlayerDialog({
               </Popover>
               <div className="text-sm text-gray-500">Age: {formData.age} years</div>
             </div>
+            <div className="flex flex-col w-full space-y-1">
+              <label className="font-semibold text-gray-700 text-sm">Date of Joining Service</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="bg-gray-50 rounded-md px-3 py-2 border border-gray-300 cursor-pointer h-auto justify-start text-left font-normal hover:bg-gray-100"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.dateOfJoiningService
+                      ? format(formData.dateOfJoiningService, "PPP")
+                      : "Select joining date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 bg-white border border-gray-300 shadow-lg" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.dateOfJoiningService}
+                    onSelect={handleDateOfJoiningServiceChange}
+                    disabled={(date) => date > new Date() || date < new Date("1950-01-01")}
+                    initialFocus
+                    className="rounded-md"
+                    captionLayout="dropdown"
+                    fromYear={1950}
+                    toYear={new Date().getFullYear()}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
             <div className="flex flex-col w-full space-y-2">
               <label className="font-semibold text-gray-700">Select Blood Group</label>
               <select
@@ -511,23 +551,6 @@ export function AddPlayerDialog({
               >
                 <option value="">Select Blood Group</option>
                 {Object.entries(bloodGroups).map(([key, value]) => (
-                  <option key={key} value={value}>
-                    {value}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex flex-col w-full space-y-2">
-              <label className="font-semibold text-gray-700">Select T-Shirt Size</label>
-              <select
-                className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
-                value={formData.tShirtSize}
-                name="tShirtSize"
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select T-Shirt Size</option>
-                {Object.entries(tShirtSizes).map(([key, value]) => (
                   <option key={key} value={value}>
                     {value}
                   </option>
@@ -784,6 +807,23 @@ export function AddPlayerDialog({
                 <option value="Non-Veg">NON VEG</option>
                 <option value="Both">BOTH</option>
                 <option value="None">NONE</option>
+              </select>
+            </div>
+            <div className="flex flex-col w-full space-y-2">
+              <label className="font-semibold text-gray-700">Select T-Shirt Size</label>
+              <select
+                className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
+                value={formData.tShirtSize}
+                name="tShirtSize"
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select T-Shirt Size</option>
+                {Object.entries(tShirtSizes).map(([key, value]) => (
+                  <option key={key} value={value}>
+                    {value}
+                  </option>
+                ))}
               </select>
             </div>
             {/* File Upload Section */}

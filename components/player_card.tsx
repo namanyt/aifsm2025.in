@@ -89,6 +89,16 @@ export function PlayerCard({
     }
   };
 
+  // Handle date of joining service change
+  const handleDateOfJoiningServiceChange = (date: Date | undefined) => {
+    if (date) {
+      setFormData((prev) => ({
+        ...prev,
+        dateOfJoiningService: date,
+      }));
+    }
+  };
+
   // Helper function to check if event is team event
   const isTeamEvent = (event: string): boolean => {
     return TEAM_EVENT_KEYWORDS.some((keyword) => event.toLowerCase().includes(keyword.toLowerCase()));
@@ -492,6 +502,60 @@ export function PlayerCard({
                 <div className="text-sm text-gray-500">Age: {formData.age} years</div>
               </div>
               <div className="flex flex-col w-full space-y-2">
+                <label className="font-semibold text-gray-700">Date of Joining Service</label>
+                {viewMode ? (
+                  <input
+                    className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-default"
+                    value={formData.dateOfJoiningService ? format(formData.dateOfJoiningService, "PPP") : "Not set"}
+                    readOnly
+                  />
+                ) : (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer h-auto justify-start text-left font-normal hover:bg-gray-100"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {formData.dateOfJoiningService
+                          ? format(formData.dateOfJoiningService, "PPP")
+                          : "Select joining date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 bg-white border border-gray-300 shadow-lg" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={formData.dateOfJoiningService}
+                        onSelect={handleDateOfJoiningServiceChange}
+                        disabled={(date) => date > new Date() || date < new Date("1950-01-01")}
+                        initialFocus
+                        className="rounded-md"
+                        captionLayout="dropdown"
+                        fromYear={1950}
+                        toYear={new Date().getFullYear()}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+                <div className="text-sm text-gray-500">
+                  {formData.dateOfJoiningService
+                    ? (() => {
+                        const today = new Date();
+                        const joiningDate = new Date(formData.dateOfJoiningService);
+                        let years = today.getFullYear() - joiningDate.getFullYear();
+                        let months = today.getMonth() - joiningDate.getMonth();
+                        if (months < 0) {
+                          years--;
+                          months += 12;
+                        }
+                        return `${years > 0 || months > 0 ? "In Service for:" : ""}${
+                          years > 0 ? ` ${years} year${years !== 1 ? "s" : ""}` : ""
+                        }${months > 0 ? ` ${months} month${months !== 1 ? "s" : ""}` : ""}`;
+                      })()
+                    : "Not set"}
+                </div>
+              </div>
+              <div className="flex flex-col w-full space-y-2">
                 <label className="font-semibold text-gray-700">Select Blood Group</label>
                 <select
                   className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${
@@ -504,25 +568,6 @@ export function PlayerCard({
                 >
                   <option value="">Select Blood Group</option>
                   {Object.entries(bloodGroups).map(([key, value]) => (
-                    <option key={key} value={value}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex flex-col w-full space-y-2">
-                <label className="font-semibold text-gray-700">Select T-Shirt Size</label>
-                <select
-                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${
-                    viewMode ? "cursor-default" : "cursor-pointer"
-                  }`}
-                  value={formData.tShirtSize || ""}
-                  name="tShirtSize"
-                  onChange={handleChange}
-                  disabled={viewMode}
-                >
-                  <option value="">Select T-Shirt Size</option>
-                  {Object.entries(tShirtSizes).map(([key, value]) => (
                     <option key={key} value={value}>
                       {value}
                     </option>
@@ -759,6 +804,25 @@ export function PlayerCard({
                   <option value="Non-Veg">NON VEG</option>
                   <option value="Both">BOTH</option>
                   <option value="None">NONE</option>
+                </select>
+              </div>
+              <div className="flex flex-col w-full space-y-2">
+                <label className="font-semibold text-gray-700">Select T-Shirt Size</label>
+                <select
+                  className={`bg-gray-50 rounded-md px-4 py-3 border border-gray-300 ${
+                    viewMode ? "cursor-default" : "cursor-pointer"
+                  }`}
+                  value={formData.tShirtSize || ""}
+                  name="tShirtSize"
+                  onChange={handleChange}
+                  disabled={viewMode}
+                >
+                  <option value="">Select T-Shirt Size</option>
+                  {Object.entries(tShirtSizes).map(([key, value]) => (
+                    <option key={key} value={value}>
+                      {value}
+                    </option>
+                  ))}
                 </select>
               </div>
 

@@ -66,6 +66,7 @@ export type Player = {
   healthIssues?: string;
   mealType: "Veg" | "Non-Veg" | "None" | "Both";
   tShirtSize: "XS" | "S" | "M" | "L" | "XL" | "XXL" | "XXXL";
+  dateOfJoiningService: Date;
   profilePicture: File;
   employeeIDCard: File;
   modeOfTravel?: string;
