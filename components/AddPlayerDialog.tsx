@@ -2,6 +2,10 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import { createPlayer, getPlayersByAadhar, getRegistrationStatus } from "@/lib/db/pb";
 import { sportsData, bloodGroups } from "@/lib/types";
 import type { Player } from "@/lib/types";
@@ -22,6 +26,7 @@ const tShirtSizes = {
 const initialPlayerState: Omit<Player, "id"> = {
   organisation: "",
   name: "",
+  dateOfBirth: new Date(),
   age: 18,
   bloodGroup: "",
   tShirtSize: undefined as any,
@@ -29,6 +34,7 @@ const initialPlayerState: Omit<Player, "id"> = {
   aadhar: "",
   employeeId: "",
   event: "",
+  events: [],
   healthIssues: "",
   mealType: "Veg",
   profilePicture: undefined as any,
@@ -48,6 +54,7 @@ export function AddPlayerDialog({
   const [selectedSport, setSelectedSport] = useState("");
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
+  const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [aadharError, setAadharError] = useState("");
   const [registrationStatus, setRegistrationStatus] = useState<{
@@ -58,6 +65,95 @@ export function AddPlayerDialog({
   const [checkingRegistrations, setCheckingRegistrations] = useState(false);
   const [registrationOpen, setRegistrationOpen] = useState(true);
   const [checkingRegistrationStatus, setCheckingRegistrationStatus] = useState(false);
+
+  // Calculate age from date of birth
+  const calculateAge = (dateOfBirth: Date): number => {
+    const today = new Date();
+    let age = today.getFullYear() - dateOfBirth.getFullYear();
+    const monthDiff = today.getMonth() - dateOfBirth.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dateOfBirth.getDate())) {
+      age--;
+    }
+
+    return age;
+  };
+
+  // Handle date of birth change
+  const handleDateOfBirthChange = (date: Date | undefined) => {
+    if (date) {
+      const age = calculateAge(date);
+      setFormData((prev) => ({
+        ...prev,
+        dateOfBirth: date,
+        age: age,
+      }));
+    }
+  };
+
+  // Helper function to check if event is team event
+  const isTeamEvent = (event: string): boolean => {
+    return TEAM_EVENT_KEYWORDS.some((keyword) => event.toLowerCase().includes(keyword.toLowerCase()));
+  };
+
+  // Count current solo and team events
+  const getEventCounts = (events: string[], newEvent?: string) => {
+    const allEvents = newEvent ? [...events, newEvent] : events;
+    const soloEvents = allEvents.filter((event) => !isTeamEvent(event)).length;
+    const teamEvents = allEvents.filter((event) => isTeamEvent(event)).length;
+    return { soloEvents, teamEvents };
+  };
+
+  // Add event to selection
+  const addEvent = () => {
+    if (selectedSport && selectedSubCategory && selectedGender) {
+      const newEvent = `${selectedSport} - ${selectedSubCategory} (${selectedGender})`;
+
+      // Check if event already selected
+      if (selectedEvents.includes(newEvent)) {
+        toast.error("This event is already selected");
+        return;
+      }
+
+      // Check limits
+      const { soloEvents, teamEvents } = getEventCounts(selectedEvents, newEvent);
+      const isNewEventTeam = isTeamEvent(newEvent);
+
+      if (isNewEventTeam && teamEvents > REGISTRATION_LIMITS.MAX_TEAM_EVENTS) {
+        toast.error(`Maximum ${REGISTRATION_LIMITS.MAX_TEAM_EVENTS} team events allowed`);
+        return;
+      }
+
+      if (!isNewEventTeam && soloEvents > REGISTRATION_LIMITS.MAX_SOLO_EVENTS) {
+        toast.error(`Maximum ${REGISTRATION_LIMITS.MAX_SOLO_EVENTS} solo events allowed`);
+        return;
+      }
+
+      const updatedEvents = [...selectedEvents, newEvent];
+      setSelectedEvents(updatedEvents);
+      setFormData((prev) => ({
+        ...prev,
+        events: updatedEvents,
+        event: updatedEvents.join(", "), // For backward compatibility
+      }));
+
+      // Reset dropdowns
+      setSelectedSport("");
+      setSelectedSubCategory("");
+      setSelectedGender("");
+    }
+  };
+
+  // Remove event from selection
+  const removeEvent = (eventToRemove: string) => {
+    const updatedEvents = selectedEvents.filter((event) => event !== eventToRemove);
+    setSelectedEvents(updatedEvents);
+    setFormData((prev) => ({
+      ...prev,
+      events: updatedEvents,
+      event: updatedEvents.join(", "),
+    }));
+  };
 
   // Validate Aadhar number
   const validateAadhar = (aadharNumber: string): string => {
@@ -290,8 +386,8 @@ export function AddPlayerDialog({
     }
 
     // Validate event selection
-    if (!formData.event) {
-      toast.error("Please select an event");
+    if (selectedEvents.length === 0) {
+      toast.error("Please select at least one event");
       return;
     }
 
@@ -310,6 +406,7 @@ export function AddPlayerDialog({
       setSelectedSport("");
       setSelectedSubCategory("");
       setSelectedGender("");
+      setSelectedEvents([]);
       toast.success("Player registered successfully!");
       // Notify parent component if callback provided
       if (onPlayerAdded && newPlayer) {
@@ -335,8 +432,8 @@ export function AddPlayerDialog({
         Register New Player
       </Button>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="min-w-[60vw] w-full max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="pb-6">
+        <DialogContent className="min-w-[90vw] max-w-[95vw] w-full max-h-[95vh] overflow-y-auto p-6">
+          <DialogHeader className="pb-4">
             <DialogTitle className="text-2xl font-bold">Register New Player</DialogTitle>
             <DialogDescription className="text-lg">Enter all details for the new player</DialogDescription>
 
@@ -350,7 +447,7 @@ export function AddPlayerDialog({
             )}
           </DialogHeader>
           <form
-            className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 text-base text-gray-800"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-3 text-base text-gray-800"
             onSubmit={handleSubmit}
           >
             <div className="flex flex-col w-full space-y-2">
@@ -375,16 +472,33 @@ export function AddPlayerDialog({
                 required
               />
             </div>
-            <div className="flex flex-col w-full space-y-2">
-              <label className="font-semibold text-gray-700">Enter Age</label>
-              <input
-                className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300 cursor-pointer"
-                type="number"
-                value={formData.age}
-                name="age"
-                onChange={handleChange}
-                required
-              />
+            <div className="flex flex-col w-full space-y-1">
+              <label className="font-semibold text-gray-700 text-sm">Date of Birth</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="bg-gray-50 rounded-md px-3 py-2 border border-gray-300 cursor-pointer h-auto justify-start text-left font-normal hover:bg-gray-100"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.dateOfBirth ? format(formData.dateOfBirth, "PPP") : "Select date of birth"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 bg-white border border-gray-300 shadow-lg" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.dateOfBirth}
+                    onSelect={handleDateOfBirthChange}
+                    disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                    initialFocus
+                    className="rounded-md"
+                    captionLayout="dropdown"
+                    fromYear={1900}
+                    toYear={new Date().getFullYear()}
+                  />
+                </PopoverContent>
+              </Popover>
+              <div className="text-sm text-gray-500">Age: {formData.age} years</div>
             </div>
             <div className="flex flex-col w-full space-y-2">
               <label className="font-semibold text-gray-700">Select Blood Group</label>
@@ -511,8 +625,8 @@ export function AddPlayerDialog({
                 required
               />
             </div>
-            <div className="flex flex-col w-full space-y-2">
-              <label className="font-semibold text-gray-700">Select Event</label>
+            <div className="col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4 flex flex-col w-full space-y-2">
+              <label className="font-semibold text-gray-700">Select Events</label>
               <div className="grid grid-cols-1 gap-3">
                 {/* Sport Category Dropdown */}
                 <div className="flex flex-col space-y-1">
@@ -521,7 +635,6 @@ export function AddPlayerDialog({
                     className="bg-gray-50 rounded-md px-4 py-3 border border-gray-300"
                     value={selectedSport}
                     onChange={(e) => handleSportChange(e.target.value)}
-                    required
                   >
                     <option value="">Select Sport</option>
                     {Object.keys(sportsData).map((sport) => (
@@ -539,7 +652,6 @@ export function AddPlayerDialog({
                     value={selectedSubCategory}
                     onChange={(e) => handleSubCategoryChange(e.target.value)}
                     disabled={!selectedSport}
-                    required
                   >
                     <option value="">Select Event Type</option>
                     {getSubCategories().map((subCategory) => (
@@ -557,8 +669,6 @@ export function AddPlayerDialog({
                     value={selectedGender}
                     onChange={(e) => setSelectedGender(e.target.value)}
                     disabled={!selectedSubCategory}
-                    onBlur={handleEventSelection}
-                    required
                   >
                     <option value="">Select Sub Category</option>
                     {getGenders().map((gender) => (
@@ -568,15 +678,86 @@ export function AddPlayerDialog({
                     ))}
                   </select>
                 </div>
-                {/* Selected Event Display */}
+
+                {/* Add Event Button */}
                 {selectedSport && selectedSubCategory && selectedGender && (
-                  <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                    <p className="text-sm font-medium text-blue-800">
-                      Selected Event:{" "}
-                      <span className="font-bold">
-                        {selectedSport} - {selectedSubCategory} ({selectedGender})
-                      </span>
-                    </p>
+                  <div className="mt-2">
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-md mb-2">
+                      <p className="text-sm font-medium text-blue-800">
+                        Ready to add:{" "}
+                        <span className="font-bold">
+                          {selectedSport} - {selectedSubCategory} ({selectedGender})
+                        </span>
+                      </p>
+                    </div>
+                    <Button type="button" onClick={addEvent} className="w-full bg-sky-600 hover:bg-sky-700 text-white">
+                      Add Event
+                    </Button>
+                  </div>
+                )}
+
+                {/* Current Event Limits Display */}
+                {selectedEvents.length > 0 && (
+                  <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-md">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-medium text-gray-700">Event Limits:</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="font-medium">Solo Events: </span>
+                        <span
+                          className={`${
+                            getEventCounts(selectedEvents).soloEvents >= REGISTRATION_LIMITS.MAX_SOLO_EVENTS
+                              ? "text-red-600 font-bold"
+                              : "text-green-600"
+                          }`}
+                        >
+                          {getEventCounts(selectedEvents).soloEvents}/{REGISTRATION_LIMITS.MAX_SOLO_EVENTS}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-medium">Team Events: </span>
+                        <span
+                          className={`${
+                            getEventCounts(selectedEvents).teamEvents >= REGISTRATION_LIMITS.MAX_TEAM_EVENTS
+                              ? "text-red-600 font-bold"
+                              : "text-green-600"
+                          }`}
+                        >
+                          {getEventCounts(selectedEvents).teamEvents}/{REGISTRATION_LIMITS.MAX_TEAM_EVENTS}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Selected Events List */}
+                {selectedEvents.length > 0 && (
+                  <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
+                    <span className="font-medium text-green-800">Selected Events ({selectedEvents.length}):</span>
+                    <ul className="mt-2 space-y-2">
+                      {selectedEvents.map((event, index) => (
+                        <li key={index} className="flex items-center justify-between bg-white p-2 rounded border">
+                          <div className="flex items-center">
+                            <span className="text-sm text-gray-700">
+                              {isTeamEvent(event) && (
+                                <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-2">TEAM</span>
+                              )}
+                              {event}
+                            </span>
+                          </div>
+                          <Button
+                            type="button"
+                            onClick={() => removeEvent(event)}
+                            variant="outline"
+                            size="sm"
+                            className="text-red-600 border-red-300 hover:bg-red-50"
+                          >
+                            Remove
+                          </Button>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 )}
               </div>
@@ -606,7 +787,7 @@ export function AddPlayerDialog({
               </select>
             </div>
             {/* File Upload Section */}
-            <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-12 mt-8 pt-6 border-t border-gray-200">
+            <div className="col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 pt-6 border-t border-gray-200">
               <div className="flex flex-col border-2 border-dashed border-gray-300 rounded-lg p-8 items-center w-full bg-gray-50 hover:bg-gray-100 transition-colors">
                 <label className="font-semibold mb-4 text-lg text-gray-700">Profile Photo</label>
                 <input
@@ -651,7 +832,7 @@ export function AddPlayerDialog({
               </div>
             </div>
             {/* Save Button */}
-            <div className="col-span-1 md:col-span-2 flex justify-center mt-8 pt-6 border-t border-gray-200">
+            <div className="col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4 flex justify-center mt-6 pt-6 border-t border-gray-200">
               <Button
                 type="submit"
                 className="bg-sky-600 hover:bg-sky-700 text-white px-12 py-3 rounded-lg text-lg font-semibold transition-colors shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"

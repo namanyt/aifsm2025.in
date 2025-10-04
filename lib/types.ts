@@ -55,12 +55,14 @@ export type Player = {
   id: string;
   organisation: string;
   name: string;
+  dateOfBirth: Date;
   age: number;
   bloodGroup: string;
   mobile: string;
   aadhar: string;
   employeeId: string;
-  event: string;
+  event: string; // Keep for backward compatibility - will store comma-separated events
+  events?: string[]; // New field for multiple events
   healthIssues?: string;
   mealType: "Veg" | "Non-Veg" | "None" | "Both";
   tShirtSize: "XS" | "S" | "M" | "L" | "XL" | "XXL" | "XXXL";

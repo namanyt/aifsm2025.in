@@ -116,17 +116,15 @@ export default function HomePage() {
       content: (
         <div className="text-center px-4">
           <h2 className="text-3xl sm:text-4xl font-semibold text-teal-900 mb-6">Highlights Video</h2>
-          <div className="max-w-6xl min-w-2xl mx-auto">
-            <div className="aspect-video rounded-lg overflow-hidden shadow-xl">
+          <div className="w-full max-w-6xl mx-auto">
+            <div className="relative w-full" style={{ paddingBottom: "56.25%" /* 16:9 aspect ratio */ }}>
               <iframe
                 src={getYouTubeEmbedUrl(YOUTUBE_VIDEO_URL)}
                 title={`${EVENT_SHORT_NAME} ${EVENT_YEAR} Event Highlights`}
-                width="100%"
-                height="100%"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
-                className="w-full h-full"
+                className="absolute top-0 left-0 w-full h-full rounded-lg shadow-xl"
               />
             </div>
           </div>
