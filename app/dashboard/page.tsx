@@ -21,12 +21,17 @@ export default async function Dashboard() {
   }
 
   const user = auth.user;
-  const userIsAdmin = isAdminUser(user?.email);
+  const userIsAdmin = isAdminUser(user?.username || user?.email);
 
   // Get players based on admin status
   const players = await getPlayersForUser(user?.id ?? "", userIsAdmin);
 
   return (
-    <DashboardClient initialPlayers={players} userId={user?.id ?? ""} isAdmin={userIsAdmin} userEmail={user?.email} />
+    <DashboardClient
+      initialPlayers={players}
+      userId={user?.id ?? ""}
+      isAdmin={userIsAdmin}
+      userEmail={user?.username || user?.email}
+    />
   );
 }

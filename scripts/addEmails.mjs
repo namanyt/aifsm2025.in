@@ -1,108 +1,86 @@
-import PocketBase from 'pocketbase';
+import fs from "fs";
+import csv from "csv-parser";
+import fetch from "node-fetch"; // npm install node-fetch@2
 
-// Initialize PocketBase
-const pb = new PocketBase('http://127.0.0.1:8090'); // Replace with your PocketBase URL
+const PB_URL = "http://127.0.0.1:8090";
+const ADMIN_EMAIL = "me@ciderboi.xyz";
+const ADMIN_PASSWORD = "naman@ciderboi.xyz";
+const USERS_CSV = "users.csv";
+const USERS_COLLECTION = "users";
 
-// List of emails
-const emails = [
-  'pccf.andaman@nic.in',
-  'pccf.ap@nic.in',
-  'pccf.arunachal@nic.in',
-  'pccf.assam@nic.in',
-  'pccf.bihar@nic.in',
-  'pccf.cg@nic.in',
-  'cf.chd@nic.in',
-  'pccf.delhi@nic.in',
-  'director.ignfa@nic.in',
-  'dirfsi@nic.in',
-  'pccf.goa@nic.in',
-  'pccf.guj@nic.in',
-  'pccf.hp@nic.in',
-  'pccf.hr@nic.in',
-  'dg@icfre.org',
-  'director@iifm.ac.in',
-  'pccf.jharkhand@nic.in',
-  'pccf.jk@nic.in',
-  'pccf.kar@nic.in',
-  'pccf.kerala@nic.in',
-  'cf.lak@nic.in',
-  'pccf.mp@nic.in',
-  'pccf.mh@nic.in',
-  'pccf.manipur@nic.in',
-  'pccf.meghalaya@nic.in',
-  'pccf.mizoram@nic.in',
-  'pccf.nagaland@nic.in',
-  'pccf.od@nic.in',
-  'pccf.pb@nic.in',
-  'pccf.raj@nic.in',
-  'pccf.sikkim@nic.in',
-  'pccf.tn@nic.in',
-  'pccf.telangana@nic.in',
-  'pccf.tripura@nic.in',
-  'pccf.up@nic.in',
-  'pccf.uk@nic.in',
-  'pccf.wb@nic.in',
-  'dfe@nic.in',
-  'dir@wii.gov.in'
-];
-
-// Function to extract username from email
-function getUsername(email) {
-  return email.split('@')[0];
+async function getAdminToken() {
+  const res = await fetch(`${PB_URL}/api/admins/auth-with-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ identity: ADMIN_EMAIL, password: ADMIN_PASSWORD }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  return data.token;
 }
 
-// Function to create users
-async function createUsers() {
-  // Authenticate as admin first
-  try {
-    await pb.admins.authWithPassword('YOUR_ADMIN_EMAIL', 'YOUR_ADMIN_PASSWORD');
-    console.log('Admin authenticated successfully');
-  } catch (error) {
-    console.error('Admin authentication failed:', error);
-    return;
-  }
+async function readUsersFromCSV(filePath) {
+  return new Promise((resolve, reject) => {
+    const results = [];
+    fs.createReadStream(filePath)
+      .pipe(csv())
+      .on("data", (row) => {
+        results.push({
+          email: row["E-mail ID"]?.split(",")[0].trim(),
+          username: row["Username"]?.trim(),
+          password: row["Password"]?.trim(),
+        });
+      })
+      .on("end", () => resolve(results))
+      .on("error", (err) => reject(err));
+  });
+}
 
-  const results = {
-    success: [],
-    failed: []
-  };
+async function createUsers(token, users) {
+  const results = { success: [], failed: [] };
 
-  for (const email of emails) {
-    const username = getUsername(email);
-    const password = 'changeme';
-
+  for (const user of users) {
     try {
-      // Create user with verified email
-      const user = await pb.collection('users').create({
-        username: username,
-        email: email,
-        password: password,
-        passwordConfirm: password,
-        emailVisibility: true,
-        verified: true
+      const res = await fetch(`${PB_URL}/api/collections/${USERS_COLLECTION}/records`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          username: user.username,
+          email: user.email,
+          password: user.password,
+          passwordConfirm: user.password,
+        }),
       });
 
-      console.log(`✓ Created user: ${username} (${email})`);
-      results.success.push(email);
-    } catch (error) {
-      console.error(`✗ Failed to create user ${username} (${email}):`, error.message);
-      results.failed.push({ email, error: error.message });
+      const data = await res.json();
+      if (!res.ok) throw new Error(JSON.stringify(data));
+
+      console.log(`✓ Created user: ${user.username} (${user.email})`);
+      results.success.push(user.email);
+    } catch (err) {
+      console.error(`✗ Failed: ${user.username} (${user.email}):`, err.message);
+      results.failed.push({ email: user.email, error: err.message });
     }
   }
 
-  // Print summary
-  console.log('\n========== SUMMARY ==========');
-  console.log(`Total users: ${emails.length}`);
+  console.log("\n========== SUMMARY ==========");
+  console.log(`Total users: ${users.length}`);
   console.log(`Successfully created: ${results.success.length}`);
   console.log(`Failed: ${results.failed.length}`);
-
   if (results.failed.length > 0) {
-    console.log('\nFailed users:');
-    results.failed.forEach(item => {
-      console.log(`  - ${item.email}: ${item.error}`);
-    });
+    console.log("Failed users:", results.failed);
   }
 }
 
-// Run the script
-createUsers().catch(console.error);
+async function main() {
+  const token = await getAdminToken();
+  console.log("✅ Admin authenticated, token received");
+
+  const users = await readUsersFromCSV(USERS_CSV);
+  await createUsers(token, users);
+}
+
+main().catch(console.error);

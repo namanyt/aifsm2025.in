@@ -115,7 +115,7 @@ export default function HomePage() {
       type: "video",
       content: (
         <div className="text-center px-4">
-          <h2 className="text-3xl sm:text-4xl font-semibold text-teal-900 mb-6">Event Highlights</h2>
+          <h2 className="text-3xl sm:text-4xl font-semibold text-teal-900 mb-6">Highlights Video</h2>
           <div className="max-w-6xl min-w-2xl mx-auto">
             <div className="aspect-video rounded-lg overflow-hidden shadow-xl">
               <iframe

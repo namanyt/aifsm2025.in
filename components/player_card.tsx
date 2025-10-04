@@ -232,7 +232,10 @@ export function PlayerCard({
           <div className="flex justify-between items-center mb-2">
             <span className="bg-red-100 text-red-800 text-xs font-semibold px-2 py-1 rounded-full">ADMIN VIEW</span>
             {showRegisteredBy && (player as any).expand?.RegisteredBy && (
-              <span className="text-xs text-gray-500">Registered by: {(player as any).expand.RegisteredBy.email}</span>
+              <span className="text-xs text-gray-500">
+                Registered by:{" "}
+                {(player as any).expand.RegisteredBy.username || (player as any).expand.RegisteredBy.email}
+              </span>
             )}
           </div>
         )}

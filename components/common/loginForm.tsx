@@ -12,7 +12,7 @@ import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { ResetPasswordDialog } from "./ResetPasswordDialog";
 import { ForgotPasswordDialog } from "./ForgotPasswordDialog";
-import { DEFAULT_PASSWORD } from "@/lib/constants";
+import { DEFAULT_PASSWORD, validateUsernameOrganization } from "@/lib/constants";
 
 export function LoginForm() {
   let [isSelectOpen, setIsSelectOpen] = useState(false);
@@ -22,7 +22,7 @@ export function LoginForm() {
 
   const form = useForm({
     defaultValues: {
-      email: "",
+      usernameOrEmail: "",
       password: "",
       org: "",
     },
@@ -44,7 +44,7 @@ export function LoginForm() {
         password: newPassword,
         passwordConfirm: newPassword,
         oldPassword: pendingCreds.password,
-        name: pendingCreds.email.split("@")[0], // Set name as part before @ in email
+        name: pendingCreds.email, // Set name as username
         org: form.getValues("org"),
       });
       setShowReset(false);
@@ -54,20 +54,27 @@ export function LoginForm() {
     }
   };
 
-  const handleSubmit = (data: { email: string; password: string; org: string }) => {
+  const handleSubmit = (data: { usernameOrEmail: string; password: string; org: string }) => {
     const output = {
-      email: data.email,
+      usernameOrEmail: data.usernameOrEmail,
       password: data.password,
       org: data.org,
     };
+
+    // Validate organization against username/email
+    if (!validateUsernameOrganization(output.usernameOrEmail, output.org)) {
+      alert("Username/Email does not match the selected organization. Please check your credentials and organization.");
+      return;
+    }
+
     // console.log("Login data:", output);
     // Handle form submission here
 
     // Always check password correctness first
-    login(output.email, output.password)
+    login(output.usernameOrEmail, output.password)
       .then((authData) => {
         if (output.password === DEFAULT_PASSWORD) {
-          setPendingCreds({ email: output.email, password: output.password });
+          setPendingCreds({ email: output.usernameOrEmail, password: output.password });
           setShowReset(true);
         } else {
           window.location.href = "/dashboard";
@@ -75,10 +82,9 @@ export function LoginForm() {
       })
       .catch((error) => {
         console.error("Login error:", error);
-        alert("Invalid credentials. Please check your email and password.");
+        alert("Invalid credentials. Please check your username/email and password.");
       });
   };
-
   return (
     <div className="w-full flex flex-col items-center py-12 bg-white">
       <div className="w-full max-w-xl">
@@ -122,12 +128,12 @@ export function LoginForm() {
             />
             <FormField
               control={form.control}
-              name="email"
+              name="usernameOrEmail"
               rules={{
-                required: "Email is required",
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "Please enter a valid email address",
+                required: "Username or Email is required",
+                minLength: {
+                  value: 3,
+                  message: "Username or Email must be at least 3 characters",
                 },
               }}
               render={({ field }) => (
@@ -135,8 +141,8 @@ export function LoginForm() {
                   <FormLabel className="text-base font-semibold text-sky-900 mb-1">Nodal Officer Login</FormLabel>
                   <FormControl>
                     <Input
-                      type="email"
-                      placeholder="Enter Email"
+                      type="text"
+                      placeholder="Enter Username or Email"
                       {...field}
                       className="h-12 px-4 border-2 border-sky-600 text-black rounded-xl placeholder:text-gray-500 focus:bg-gray-200 cursor-pointer"
                     />

@@ -1,38 +1,42 @@
 export type RegisterFormData = {
-  email: string;
+  usernameOrEmail: string;
   password: string;
   org: Orgs;
 };
 
 export enum Orgs {
-  "Andaman and Nicobar",
+  "Andaman & Nicobar Islands",
   "Andhra Pradesh",
-  "Arunachal Pradesh",
+  "Aruranchal Pradesh",
   "Assam",
   "Bihar",
-  "Chhattisgarh",
   "Chandigarh",
+  "Chattisgarh",
+  "Dadra & Nagar Haveli & Daman & Diu",
   "Delhi",
-  "IGNFA & DFE",
   "FSI",
   "Goa",
   "Gujarat",
-  "Himachal Pradesh",
   "Haryana",
+  "Himachal Pradesh",
   "ICFRE",
+  "IGNFA & DFE",
   "IIFM",
-  "Jharkhand",
   "Jammu & Kashmir",
-  "Karnataka",
+  "Jharkhand",
+  "Karnatka",
   "Kerala",
+  "Laddakh",
   "Lakshadweep",
   "Madhya Pradesh",
   "Maharashtra",
   "Manipur",
   "Meghalaya",
   "Mizoram",
+  "MoEFCC",
   "Nagaland",
   "Odisha",
+  "Puducherry",
   "Punjab",
   "Rajasthan",
   "Sikkim",
@@ -42,9 +46,9 @@ export enum Orgs {
   "Uttar Pradesh",
   "Uttarakhand",
   "West Bengal",
-  "Andaman DFE (MoEFCC)",
   "WII",
-  "MoEFCC HQ",
+
+  "DUMMY",
 }
 
 export type Player = {

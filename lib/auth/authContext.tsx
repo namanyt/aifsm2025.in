@@ -8,7 +8,7 @@ type User = typeof pb.authStore.record | null;
 
 interface AuthContextProps {
   user: User;
-  login: (email: string, password: string) => Promise<void>;
+  login: (usernameOrEmail: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -42,12 +42,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (usernameOrEmail: string, password: string) => {
     try {
       // console.log("🔄 Attempting to login with PocketBase...");
-      const authData = await pb.collection("users").authWithPassword(email, password);
+      const authData = await pb.collection("users").authWithPassword(usernameOrEmail, password);
       // console.log("✅ PocketBase authentication successful");
-      // console.log("📋 Auth data:", { user: authData.record.email, id: authData.record.id });
+      // console.log("📋 Auth data:", { user: authData.record.username || authData.record.email, id: authData.record.id });
 
       setUser(pb.authStore.record);
       const cookieStr = pb.authStore.exportToCookie(); // PocketBase cookie string

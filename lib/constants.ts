@@ -29,7 +29,7 @@ export const SITE_DESCRIPTION =
 export const SITE_KEYWORDS = "AIFSM, All India Forest Sports Meet, Uttarakhand, Forest Department, Sports, 2025";
 
 // Video Configuration
-export const YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=stRBEnvMhKk"; // YouTube video for the carousel
+export const YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=B-GKC3lhvsM"; // YouTube video for the carousel
 
 // Pagination Settings
 export const ITEMS_PER_PAGE = 4; // Number of news items per page
@@ -58,8 +58,125 @@ export const TEAM_EVENT_KEYWORDS = [
 export const ADMIN_EMAIL = "admin@aifsm2025.in";
 
 // Helper function to check if user is admin
-export const isAdminUser = (userEmail: string | null | undefined): boolean => {
-  return userEmail === ADMIN_EMAIL;
+export const isAdminUser = (userEmailOrUsername: string | null | undefined): boolean => {
+  if (!userEmailOrUsername) return false;
+  // Check both email and username patterns for admin access
+  return userEmailOrUsername === ADMIN_EMAIL || userEmailOrUsername === "admin";
+};
+
+// Helper function to validate organization based on username
+export const validateUsernameOrganization = (usernameOrEmail: string, selectedOrg: string): boolean => {
+  if (!usernameOrEmail || !selectedOrg) return false;
+
+  // Actual user data from CSV for validation
+  const USER_ORG_MAP: Record<string, string> = {
+    // Username -> Organization mapping from actual CSV data
+    "advait.indian": "IIFM",
+    "santosh.goa": "Goa",
+    "n.meghalaya": "Meghalaya",
+    "amit.wildlife": "WII",
+    "amlendu.indira": "IGNFA & DFE",
+    "drka.jammu": "Jammu & Kashmir",
+    "elusing.telangana": "Telangana",
+    "shalini.chattisgarh": "Chattisgarh",
+    "deepa.kerala": "Kerala",
+    "s.gujarat": "Gujarat",
+    "kasi.andhra": "Andhra Pradesh",
+    "drpv.delhi": "Delhi",
+    "pinaki.uttar": "Uttar Pradesh",
+    "dharm.uttarakhand": "Uttarakhand",
+    "raju.west": "West Bengal",
+    "suraj.andaman": "Andaman & Nicobar Islands",
+    "anand.dadra": "Dadra & Nagar Haveli & Daman & Diu",
+    "rajesh.indian": "ICFRE",
+    "damodhar.ar": "Aruranchal Pradesh",
+    "sh.chandigarh": "Chandigarh",
+    "nandakumar.puducherry": "Puducherry",
+    "sanjeev.maharashtra": "Maharashtra",
+    "dr.haryana": "Haryana",
+    "k.himachal": "Himachal Pradesh",
+    "karthick.odisha": "Odisha",
+    "k.rajasthan": "Rajasthan",
+    "manjunath.karnatka": "Karnatka",
+    "hari.madhya": "Madhya Pradesh",
+    "arvind.forest": "FSI",
+    "paritosh.jharkhand": "Jharkhand",
+    "anwardeen.tamil": "Tamil Nadu",
+    "prabhat.nagaland": "Nagaland",
+    "plt.tripura": "Tripura",
+    "rajendra.ministry": "MoEFCC",
+    "rajendra.assam": "Assam",
+    "sanajaoba.manipur": "Manipur",
+    "satyajeet.bihar": "Bihar",
+    "pssk.lakshadweep": "Lakshadweep",
+    "laltlanhlua.mizoram": "Mizoram",
+    "udai.sikkim": "Sikkim",
+    "vishal.punjab": "Punjab",
+    "vishal.laddakh": "Laddakh",
+    admin: "DUMMY", // Admin user for testing
+    dummy: "DUMMY", // Dummy entry for testing
+  };
+
+  // Email -> Organization mapping from actual CSV data
+  const EMAIL_ORG_MAP: Record<string, string> = {
+    "advaite@iifmbhopal.edu.in": "IIFM",
+    "agmu270@ifs.nic.in": "Goa",
+    "alemokyn@gmail.com": "Meghalaya",
+    "amit@wii.gov.in": "WII",
+    "amlendupathak86@gmail.com": "IGNFA & DFE",
+    "anandhifs2004@gmail.com": "Jammu & Kashmir",
+    "elusingm@yahoo.com": "Telangana",
+    "apccf-hrdit.cg@gov.in": "Chattisgarh",
+    "apccfihrd@gmail.com": "Kerala",
+    "apccfrtgs@gmail.com": "Gujarat",
+    "apfd.aifsm@gmail.com": "Andhra Pradesh",
+    "ccf.gnctd@delhi.gov.in": "Delhi",
+    "ccfepr@gmail.com": "Uttar Pradesh",
+    "cfbhagirathi123@gmail.com": "Uttarakhand",
+    "dasraju@icloud.com": "West Bengal",
+    "dcfmdchatham@gmail.com": "Andaman & Nicobar Islands",
+    "dcft-dnh@ddd.gov.in": "Dadra & Nagar Haveli & Daman & Diu",
+    "ddg_res@icfre.org": "ICFRE",
+    "drdamodharatifs@gmail.com": "Aruranchal Pradesh",
+    "forestchandiarh@gmail.com": "Chandigarh",
+    "forestpuducherry@gmail.com": "Puducherry",
+    "gaursanjeevgaur@gmail.com": "Maharashtra",
+    "haryanacampa@gmail.com": "Haryana",
+    "head-forcirshi-hp@hp.gov.in": "Himachal Pradesh",
+    "karthickvifs@gmail.com": "Odisha",
+    "kcaarunifs@gmail.com": "Rajasthan",
+    "manjunathchavanifs@gmail.com": "Karnatka",
+    "mohantahs@gmail.com": "Madhya Pradesh",
+    "ms308@ifs.nic.in": "FSI",
+    "paritosh1069@gmail.com": "Jharkhand",
+    "pccfre@gmail.com": "Tamil Nadu",
+    "prabhatkumar87@gmail.com": "Nagaland",
+    "pravin.tripura@gmail.com": "Tripura",
+    "raghu.prasad@gov.in": "MoEFCC",
+    "rajusbharti@gmail.com": "Assam",
+    "sanakhu@gmail.com": "Manipur",
+    "satyajk98@gmail.com": "Bihar",
+    "sskkvt@gmail.com": "Lakshadweep",
+    "tlanazathang49@gmail.com": "Mizoram",
+    "udaigurung@yahoo.com": "Sikkim",
+    "vishalchauhan.ifs@gmail.com": "Punjab",
+    "vishalsurve81@rediffmail.com": "Laddakh",
+    "admin@aifsm2025.in": "DUMMY", // Admin user for testing
+    "dummy@aifsm2025.in": "DUMMY", // Dummy entry for testing
+  };
+
+  // Check if it's an email (contains @)
+  const isEmail = usernameOrEmail.includes("@");
+
+  if (isEmail) {
+    // Validate using email mapping
+    const orgFromEmail = EMAIL_ORG_MAP[usernameOrEmail.toLowerCase()];
+    return orgFromEmail === selectedOrg;
+  } else {
+    // Validate using username mapping
+    const orgFromUsername = USER_ORG_MAP[usernameOrEmail.toLowerCase()];
+    return orgFromUsername === selectedOrg;
+  }
 };
 
 // Database Configuration

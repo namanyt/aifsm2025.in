@@ -49,7 +49,7 @@ export default function About() {
             </div>
 
             {/* Text (spans 2/3 on desktop) */}
-            <div className="md:col-span-2 space-y-4 text-lg text-black">
+            <div className="md:col-span-2 space-y-4 text-lg text-black text-justify">
               <p>
                 The All India Forest Sports Meet (AIFSM) is aimed at promoting sports and games activities among the
                 staff and officers of the Forest Departments/Organisations/Institutions of the States, Union Territories

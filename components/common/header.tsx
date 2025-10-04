@@ -57,7 +57,7 @@ export function Header() {
 
           {/* Center Text - Hidden on mobile */}
           <div className="hidden lg:block text-center flex-1 px-4 transform translate-x-10">
-            <div className="text-black text-base xl:text-xl font-medium font-['Inter'] leading-relaxed tracking-tight">
+            <div className="text-black text-base xl:text-xl font-semibold font-['Inter'] leading-relaxed tracking-tight">
               {EVENT_TITLE}
               <br />
               {ORGANIZING_DEPT}
